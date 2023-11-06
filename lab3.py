@@ -31,9 +31,9 @@ def main():
         print("     - lab2 renames and allocates the file.")
         print("     - lab3 checks validity of file, then passes the file to lab2 which passes the file to lab1.")
         print("FLAGS:")
-        print("     lab2 -x [filename]     Performs scanning, parsing, renaming on the file and then prints the renamed block to the stdout.")
+        print("     -lab2 -x [filename]     Performs scanning, parsing, renaming on the file and then prints the renamed block to the stdout.")
         print("")
-        print("     lab2 [k] [filename]      Where k is the number of registers available to the allocator (3<=k<=64).")
+        print("     -lab2 [k] [filename]      Where k is the number of registers available to the allocator (3<=k<=64).")
         print("                     Scan, parse, rename, and allocate code in the input block given in filename so that it uses")
         print("                     only registers r0 to rk-1 and prints the resulting code in the stdout.")
         print("     [filename]          Runs lab3, i.e. used to invoke schedule shit.")
@@ -50,7 +50,15 @@ def main():
             print(f"ERROR input file not found", file=sys.stderr)
             sys.exit()
         Lab_2 = lab2.Lab2(f)
-        Lab_2.main()
+        Lab_2.rename()
+        if (sys.argv[1] == '-lab2'):
+            if (sys.argv[2] == '-x'):
+                Lab_2.print_renamed_block()
+            elif (int(sys.argv[2]) >= 3 and int(sys.argv[2]) <= 64):
+                # lab2.allocate(int(sys.argv[1]))
+                Lab_2.dif_alloc(int(sys.argv[2]))
+                Lab_2.print_allocated_file()
+        # Lab_2.main()
         f.close()
         Lab_3 = Lab3()
         Lab_3.dummy()
