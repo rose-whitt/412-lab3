@@ -13,6 +13,8 @@ NU_IDX = 3
 
 class Lab1:
   def __init__(self):
+    print("LAB1 init")
+
     self.ir_list = LinkedList()
     self.EOF_FLAG = False
     self.num_srs = 0
@@ -385,6 +387,7 @@ class Lab1:
     #     the if statements
 
 
+    print("LAB1 MAIN")
     
        
 
@@ -433,7 +436,7 @@ class Lab1:
     #     print("\n")
     #     print("At most one of the following three flags:")
     #     print("     -s      prints tokens in token stream, only invokes scanner")
-    #     print("     -p      invokes parser and reports on success or failure, invokes scanner and parser")
+    #     print("     -p      invokes parser and resports on success or failure, invokes scanner and parser")
     #     print("     -r      prints the human readable version of parser's IR")
     #     print("If none is specified, the default action is '-p'.")
         

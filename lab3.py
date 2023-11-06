@@ -12,10 +12,9 @@ class Lab3:
     
         is_rematerializable: list of loadI nodes that are rematerializable 
     """
-    def __init__(self, file):
-        print("HELLO!")
-        self.file = file
-        self.Lab_2.main()
+    def __init__(self):
+        print("LAB3 INIT")
+
 
 def main():
     # pr = cProfile.Profile()
@@ -36,42 +35,43 @@ def main():
         print("                     only registers r0 to rk-1 and prints the resulting code in the stdout.")
         print("     [filename]          Runs lab3, i.e. used to invoke schedule shit.")
     else:
-        # check file validity before Lab1, remove that from lab1
-        if (sys.argv[1] == 'lab2'):
-            # file will be sys.argv[3], check file validity
-            __file__ = sys.argv[2]
+        lab2.main()
+        # # check file validity before Lab1, remove that from lab1
+        # if (sys.argv[1] == 'lab2'):
+        #     # file will be sys.argv[3], check file validity
+        #     __file__ = sys.argv[2]
 
-            # open file
-            try:
-                f = open(__file__, 'r')
-            except FileNotFoundError:  # FileNotFoundError in Python 3
-                print(f"ERROR input file not found", file=sys.stderr)
-                sys.exit()
+        #     # open file
+        #     try:
+        #         f = open(__file__, 'r')
+        #     except FileNotFoundError:  # FileNotFoundError in Python 3
+        #         print(f"ERROR input file not found", file=sys.stderr)
+        #         sys.exit()
             
-            # initialize lab2/run lab1
-            lab2 = lab2.main(f)
-            # rename
-            if (sys.argv[2] == '-x'):   # print renamed block
+        #     # initialize lab2/run lab1
+        #     lab2 = lab2.main(f)
+        #     # rename
+        #     if (sys.argv[2] == '-x'):   # print renamed block
 
-                f.close()
+        #         f.close()
 
-            elif (int(sys.argv[2]) >= 3 and int(sys.argv[2]) <= 64):
+        #     elif (int(sys.argv[2]) >= 3 and int(sys.argv[2]) <= 64):
 
-                f.close()
-
-
+        #         f.close()
 
 
 
-        __file__ = sys.argv[2]
 
-        # open file
-        try:
-            f = open(__file__, 'r')
-        except FileNotFoundError:  # FileNotFoundError in Python 3
-            print(f"ERROR input file not found", file=sys.stderr)
-            sys.exit()
-        lab3 = Lab3(f)
+
+        # __file__ = sys.argv[2]
+
+        # # open file
+        # try:
+        #     f = open(__file__, 'r')
+        # except FileNotFoundError:  # FileNotFoundError in Python 3
+        #     print(f"ERROR input file not found", file=sys.stderr)
+        #     sys.exit()
+        # lab3 = Lab3(f)
     # if (sys.argv[1] == '-h'):
     #     print("\n")
     #     print("Command Syntax:")
