@@ -14,6 +14,9 @@ class Lab3:
     """
     def __init__(self):
         print("LAB3 INIT")
+    
+    def dummy(self):
+        print("WASSUP BITCH")
 
 
 def main():
@@ -35,7 +38,24 @@ def main():
         print("                     only registers r0 to rk-1 and prints the resulting code in the stdout.")
         print("     [filename]          Runs lab3, i.e. used to invoke schedule shit.")
     else:
-        lab2.main()
+
+        arg_len = len(sys.argv)
+
+        __file__ = sys.argv[arg_len - 1]
+            
+        # open file
+        try:
+            f = open(__file__, 'r')
+        except FileNotFoundError:  # FileNotFoundError in Python 3
+            print(f"ERROR input file not found", file=sys.stderr)
+            sys.exit()
+        Lab_2 = lab2.Lab2(f)
+        Lab_2.main()
+        f.close()
+        Lab_3 = Lab3()
+        Lab_3.dummy()
+
+        # lab2.main()
         # # check file validity before Lab1, remove that from lab1
         # if (sys.argv[1] == 'lab2'):
         #     # file will be sys.argv[3], check file validity

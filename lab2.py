@@ -51,24 +51,25 @@ class Lab2:
     
         is_rematerializable: list of loadI nodes that are rematerializable 
     """
-    def __init__(self, ir_list, max_reg, num_srs):
+    def __init__(self, file):
         print("LAB 2 INIT")
+        self.file = file
         # Get IR
-        # self.Lab_1 = lab1.Lab1()  # init
+        self.Lab_1 = lab1.Lab1()  # init
 
-        # self.Lab_1.main(file, True, False)
+        self.Lab_1.main(self.file, True, False)
         # self.Lab_1 = Lab_1
 
-        # self.IR_LIST = self.Lab_1.ir_list
-        self.IR_LIST = ir_list
+        self.IR_LIST = self.Lab_1.ir_list
+        # self.IR_LIST = ir_list
 
         # self.IR_LIST.print_table(self.IR_LIST)
 
-        # self.max_sr_num = self.Lab_1.max_reg
-        self.max_sr_num = max_reg
+        self.max_sr_num = self.Lab_1.max_reg
+        # self.max_sr_num = max_reg
 
-        # self.num_srs_filled = self.Lab_1.num_srs
-        self.num_srs_filled = num_srs
+        self.num_srs_filled = self.Lab_1.num_srs
+        # self.num_srs_filled = num_srs
 
 
         self.VR_name = 0    # renaming
@@ -548,80 +549,71 @@ class Lab2:
 
         # self.IR_LIST.print_table(self.IR_LIST)
 
-    
-
-        
-        
-    
 
 
 
-  
-   
+    def main(self):
+        # pr = cProfile.Profile()
+        # pr.enable() 
+        print("LAB2 MAIN")
+        arg_len = len(sys.argv)
 
-
-def main():
-    # pr = cProfile.Profile()
-    # pr.enable() 
-    print("LAB2 MAIN")
-    arg_len = len(sys.argv)
-
-    if (sys.argv[1] == '-h'):
-            print("\n")
-            print("Command Syntax:")
-            print("     ./412alloc [flag or number of registers] <filename>")
-            print("\n")
-            print("Required arguments:")
-            print("     filename is the pathname (absolute or relative) to the input file. When the flag is '-h', no filename should be specified and nothing after the flag is processed.")
-            print("\n")
-            print("Optional flags:")
-            print("     -h      prints this message")
-            print("\n")
-            print("At most one of the following three flags:")
-            print("     -x      Performs scanning, parsing, renaming on the file and then prints the renamed block to the stdout.")
-            print("     [k]       Where k is the number of registers available to the allocator (3<=k<=64).")
-            print("                     Scan, parse, rename, and allocate code in the input block given in filename so that it uses")
-            print("                     only registers r0 to rk-1 and prints the resulting code in the stdout.")
-    else:
-        if (arg_len <= 2):
-            print("Must specify a file name after the flag.")
+        if (sys.argv[1] == '-h'):
+                print("\n")
+                print("Command Syntax:")
+                print("     ./412alloc [flag or number of registers] <filename>")
+                print("\n")
+                print("Required arguments:")
+                print("     filename is the pathname (absolute or relative) to the input file. When the flag is '-h', no filename should be specified and nothing after the flag is processed.")
+                print("\n")
+                print("Optional flags:")
+                print("     -h      prints this message")
+                print("\n")
+                print("At most one of the following three flags:")
+                print("     -x      Performs scanning, parsing, renaming on the file and then prints the renamed block to the stdout.")
+                print("     [k]       Where k is the number of registers available to the allocator (3<=k<=64).")
+                print("                     Scan, parse, rename, and allocate code in the input block given in filename so that it uses")
+                print("                     only registers r0 to rk-1 and prints the resulting code in the stdout.")
         else:
-            __file__ = sys.argv[2]
-        
-        # open file
-            try:
-                f = open(__file__, 'r')
-            except FileNotFoundError:  # FileNotFoundError in Python 3
-                print(f"ERROR input file not found", file=sys.stderr)
-                sys.exit()
-            # Reading a file
-            # f = open(__file__, 'r')
-            Lab_1 = lab1.Lab1()
-            Lab_1.main(f, True, False)
-            ir_list = Lab_1.ir_list
-            max_reg = Lab_1.max_reg
-            num_srs = Lab_1.num_srs
-            f.close()
+            if (arg_len <= 2):
+                print("Must specify a file name after the flag.")
+            else:
+                # __file__ = sys.argv[2]
+            
+                # # open file
+                # try:
+                #     f = open(__file__, 'r')
+                # except FileNotFoundError:  # FileNotFoundError in Python 3
+                #     print(f"ERROR input file not found", file=sys.stderr)
+                #     sys.exit()
+                # Reading a file
+                # f = open(__file__, 'r')
+                # Lab_1 = lab1.Lab1()
+                # Lab_1.main(f, True, False)
+                # ir_list = Lab_1.ir_list
+                # max_reg = Lab_1.max_reg
+                # num_srs = Lab_1.num_srs
+                # f.close()
 
-            lab2 = Lab2(ir_list, max_reg, num_srs)
+                # lab2 = Lab2(ir_list, max_reg, num_srs)
 
-            lab2.rename()
+                self.rename()
 
-            if (sys.argv[1] == '-x'):
-                lab2.print_renamed_block()
-            elif (int(sys.argv[1]) >= 3 and int(sys.argv[1]) <= 64):
-                # lab2.allocate(int(sys.argv[1]))
-                lab2.dif_alloc(int(sys.argv[1]))
-                lab2.print_allocated_file()
-            # lab2.IR_LIST.print_table(lab2.IR_LIST)
-        # pr.disable()
-        # s = StringIO()
-        # sortby = 'cumulative'
-        # ps = pstats.Stats(pr, stream=s).sort_stats(sortby)
-        # ps.print_stats()
-        # sys.stdout.write(s.getvalue())
+                if (sys.argv[1] == '-x'):
+                    self.print_renamed_block()
+                elif (int(sys.argv[1]) >= 3 and int(sys.argv[1]) <= 64):
+                    # lab2.allocate(int(sys.argv[1]))
+                    self.dif_alloc(int(sys.argv[1]))
+                    self.print_allocated_file()
+                # lab2.IR_LIST.print_table(lab2.IR_LIST)
+            # pr.disable()
+            # s = StringIO()
+            # sortby = 'cumulative'
+            # ps = pstats.Stats(pr, stream=s).sort_stats(sortby)
+            # ps.print_stats()
+            # sys.stdout.write(s.getvalue())
 
 
 
-if __name__ == "__main__":
-  main()
+# if __name__ == "__main__":
+#   main()
