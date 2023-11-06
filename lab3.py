@@ -12,10 +12,9 @@ class Lab3:
     
         is_rematerializable: list of loadI nodes that are rematerializable 
     """
-    def __init__(self):
-
+    def __init__(self, file):
         print("HELLO!")
-        self.Lab_2 = lab2.Lab2()
+        self.file = file
         self.Lab_2.main()
 
 def main():
@@ -24,9 +23,55 @@ def main():
     print("in lab3 main")
     print(sys.argv)
     if (sys.argv[1] == '-h'):
-        print("TODO: MAKE HELP FLAG!")
+        print("HELP: FUNCTIONALITY AND COMMAND LINE FLAGS")
+        print("     - the file is checked for validity in lab3, i.e. before it is passed into lab2, lab1.")
+        print("     - lab1 runs with the functionality of the -p flag from lab1. that is that it invokes parser and resports on success or failure, invokes scanner and parser.")
+        print("     - lab2 renames and allocates the file.")
+        print("     - lab3 checks validity of file, then passes the file to lab2 which passes the file to lab1.")
+        print("FLAGS:")
+        print("     lab2 -x [filename]     Performs scanning, parsing, renaming on the file and then prints the renamed block to the stdout.")
+        print("")
+        print("     lab2 [k] [filename]      Where k is the number of registers available to the allocator (3<=k<=64).")
+        print("                     Scan, parse, rename, and allocate code in the input block given in filename so that it uses")
+        print("                     only registers r0 to rk-1 and prints the resulting code in the stdout.")
+        print("     [filename]          Runs lab3, i.e. used to invoke schedule shit.")
     else:
-        lab3 = Lab3()
+        # check file validity before Lab1, remove that from lab1
+        if (sys.argv[1] == 'lab2'):
+            # file will be sys.argv[3], check file validity
+            __file__ = sys.argv[2]
+
+            # open file
+            try:
+                f = open(__file__, 'r')
+            except FileNotFoundError:  # FileNotFoundError in Python 3
+                print(f"ERROR input file not found", file=sys.stderr)
+                sys.exit()
+            
+            # initialize lab2/run lab1
+            lab2 = lab2.main(f)
+            # rename
+            if (sys.argv[2] == '-x'):   # print renamed block
+
+                f.close()
+
+            elif (int(sys.argv[2]) >= 3 and int(sys.argv[2]) <= 64):
+
+                f.close()
+
+
+
+
+
+        __file__ = sys.argv[2]
+
+        # open file
+        try:
+            f = open(__file__, 'r')
+        except FileNotFoundError:  # FileNotFoundError in Python 3
+            print(f"ERROR input file not found", file=sys.stderr)
+            sys.exit()
+        lab3 = Lab3(f)
     # if (sys.argv[1] == '-h'):
     #     print("\n")
     #     print("Command Syntax:")

@@ -373,7 +373,7 @@ class Lab1:
     
 
 
-  def main(self, LAB2_FLAG, PRINT_BEFORE):
+  def main(self, file, LAB2_FLAG, PRINT_BEFORE):
     """
     - LAB2_FLAG: true if we are wanting to run lab2 flag
     - PRINT_BEFORE: true if we want to print the IR representation before renaming, for debugging
@@ -395,154 +395,158 @@ class Lab1:
 
     arg_len = len(sys.argv)
 
-    if (LAB2_FLAG):
-      if (arg_len <= 2):
-        print("Must specify a file name after the flag.")
-      else:
-        __file__ = sys.argv[2]
+    # SHOULD AUTOMATICALLY DO -R FLAG FUNCTIONALITY
+    self.run(file, '-r')
+
+
+    # if (LAB2_FLAG):
+    #   if (arg_len <= 2):
+    #     print("Must specify a file name after the flag.")
+    #   else:
+    #     __file__ = sys.argv[2]
       
-      # open file
-        try:
-            f = open(__file__, 'r')
-        except FileNotFoundError:  # FileNotFoundError in Python 3
-            print(f"ERROR input file not found", file=sys.stderr)
-            sys.exit()
-        # Reading a file
-        # f = open(__file__, 'r')
+    #   # open file
+    #     try:
+    #         f = open(__file__, 'r')
+    #     except FileNotFoundError:  # FileNotFoundError in Python 3
+    #         print(f"ERROR input file not found", file=sys.stderr)
+    #         sys.exit()
+    #     # Reading a file
+    #     # f = open(__file__, 'r')
 
-        self.run(f, '-r')
-        # self.ir_list.print_list()
+    #     self.run(f, '-r')
+    #     # self.ir_list.print_list()
 
 
-        f.close()
-    else:
-      if (sys.argv[1] == '-h'):
-        print("\n")
-        print("Command Syntax:")
-        print("     ./412fe [flags] filename")
-        print("\n")
-        print("Required arguments:")
-        print("     filename is the pathname (absolute or relative) to the input file. When the flag is '-h', no filename should be specified and nothing after the flag is processed.")
-        print("\n")
-        print("Optional flags:")
-        print("     -h      prints this message")
-        print("\n")
-        print("At most one of the following three flags:")
-        print("     -s      prints tokens in token stream, only invokes scanner")
-        print("     -p      invokes parser and resports on success or failure, invokes scanner and parser")
-        print("     -r      prints the human readable version of parser's IR")
-        print("If none is specified, the default action is '-p'.")
+    #     f.close()
+    # else:
+    #   if (sys.argv[1] == '-h'):
+    #     print("\n")
+    #     print("Command Syntax:")
+    #     print("     ./412fe [flags] filename")
+    #     print("\n")
+    #     print("Required arguments:")
+    #     print("     filename is the pathname (absolute or relative) to the input file. When the flag is '-h', no filename should be specified and nothing after the flag is processed.")
+    #     print("\n")
+    #     print("Optional flags:")
+    #     print("     -h      prints this message")
+    #     print("\n")
+    #     print("At most one of the following three flags:")
+    #     print("     -s      prints tokens in token stream, only invokes scanner")
+    #     print("     -p      invokes parser and reports on success or failure, invokes scanner and parser")
+    #     print("     -r      prints the human readable version of parser's IR")
+    #     print("If none is specified, the default action is '-p'.")
         
-      elif (sys.argv[1] == '-r'):
-        # print("TODO: read the file, parse it, build the intermediate representation (IR), and print out the information in the intermediate representaiton (in an appropriately human readable format)")
-        if (arg_len <= 2):
-          print("Must specify a file name after the flag.")
-        else:
-          __file__ = sys.argv[2]
+    #   elif (sys.argv[1] == '-r'):
+    #     # print("TODO: read the file, parse it, build the intermediate representation (IR), and print out the information in the intermediate representaiton (in an appropriately human readable format)")
+    #     if (arg_len <= 2):
+    #       print("Must specify a file name after the flag.")
+    #     else:
+    #       __file__ = sys.argv[2]
 
-          # open file
-          try:
-              f = open(__file__, 'r')
-          except FileNotFoundError:  # FileNotFoundError in Python 3
-              print(f"ERROR input file not found", file=sys.stderr)
-              sys.exit()
-          # Reading a file
-          # f = open(__file__, 'r')
+    #       # open file
+    #       try:
+    #           f = open(__file__, 'r')
+    #       except FileNotFoundError:  # FileNotFoundError in Python 3
+    #           print(f"ERROR input file not found", file=sys.stderr)
+    #           sys.exit()
+    #       # Reading a file
+    #       # f = open(__file__, 'r')
 
-          self.run(f, '-r')
-          self.ir_list.print_list()
-          f.close()
-      elif (sys.argv[1] == '-p'):
-        # print("TODO: read the file, scan it and parse it, build the intermediate representation (IR) and report either success or report all the errors that it finds in the input file.")
-        if (arg_len <= 2):
-          print("Must specify a file name after the flag.")
-        else:
-          __file__ = sys.argv[2]
+    #       self.run(f, '-r')
+    #       self.ir_list.print_list()
+    #       f.close()
+    #   elif (sys.argv[1] == '-p'):
+    #     # print("TODO: read the file, scan it and parse it, build the intermediate representation (IR) and report either success or report all the errors that it finds in the input file.")
+    #     if (arg_len <= 2):
+    #       print("Must specify a file name after the flag.")
+    #     else:
+    #       __file__ = sys.argv[2]
 
-          # open file
-          try:
-              f = open(__file__, 'r')
-          except FileNotFoundError:  # FileNotFoundError in Python 3
-              print(f"ERROR input file not found", file=sys.stderr)
-              sys.exit()
+    #       # open file
+    #       try:
+    #           f = open(__file__, 'r')
+    #       except FileNotFoundError:  # FileNotFoundError in Python 3
+    #           print(f"ERROR input file not found", file=sys.stderr)
+    #           sys.exit()
 
-          # __file__ = sys.argv[2]
-          # Reading a file
-          # f = open(__file__, 'r')
-          # start(f, '-p')
-          self.run(f, '-p')
-          f.close()
-      elif (sys.argv[1] == '-s'):
-        # print("TODO: read file and print to stdout a list of tokens that the scanner found. for each, print line number, tokens type (or syntactic category) and its spelling (or lexeme)")
-        if (arg_len <= 2):
-          print("Must specify a file name after the flag.")
-        else:
+    #       # __file__ = sys.argv[2]
+    #       # Reading a file
+    #       # f = open(__file__, 'r')
+    #       # start(f, '-p')
+    #       self.run(f, '-p')
+    #       f.close()
+    #   elif (sys.argv[1] == '-s'):
+    #     # print("TODO: read file and print to stdout a list of tokens that the scanner found. for each, print line number, tokens type (or syntactic category) and its spelling (or lexeme)")
+    #     if (arg_len <= 2):
+    #       print("Must specify a file name after the flag.")
+    #     else:
 
-          __file__ = sys.argv[2]
+    #       __file__ = sys.argv[2]
 
-          # open file
-          try:
-              f = open(__file__, 'r')
-          except FileNotFoundError:  # FileNotFoundError in Python 3
-              print(f"ERROR input file not found", file=sys.stderr)
-              sys.exit()
-          # __file__ = sys.argv[2]
-          # # Reading a file
-          # poo = 0
-          # f = open(__file__, 'r')
-          self.run(f, '-s')
-          # while (token != ["ENDFILE", ""]): # NOTE: should i read the line by line here?
-          #   scan_func(f)
-          #   poo += 1
-          f.close()
-      elif (int(sys.argv[1]) >= 3 and int(sys.argv[1]) <= 64):
-        if (arg_len <= 2):
-          print("Must specify a file name after k.")
-        else:
-          __file__ = sys.argv[2]
+    #       # open file
+    #       try:
+    #           f = open(__file__, 'r')
+    #       except FileNotFoundError:  # FileNotFoundError in Python 3
+    #           print(f"ERROR input file not found", file=sys.stderr)
+    #           sys.exit()
+    #       # __file__ = sys.argv[2]
+    #       # # Reading a file
+    #       # poo = 0
+    #       # f = open(__file__, 'r')
+    #       self.run(f, '-s')
+    #       # while (token != ["ENDFILE", ""]): # NOTE: should i read the line by line here?
+    #       #   scan_func(f)
+    #       #   poo += 1
+    #       f.close()
+    #   elif (int(sys.argv[1]) >= 3 and int(sys.argv[1]) <= 64):
+    #     if (arg_len <= 2):
+    #       print("Must specify a file name after k.")
+    #     else:
+    #       __file__ = sys.argv[2]
 
-          # open file
-          try:
-              f = open(__file__, 'r')
-          except FileNotFoundError:  # FileNotFoundError in Python 3
-              print(f"ERROR input file not found", file=sys.stderr)
-              sys.exit()
-          # __file__ = sys.argv[2]
-          # # Reading a file
-          # poo = 0
-          # f = open(__file__, 'r')
-          self.run(f, '-p')
-          # while (token != ["ENDFILE", ""]): # NOTE: should i read the line by line here?
-          #   scan_func(f)
-          #   poo += 1
-          f.close()
+    #       # open file
+    #       try:
+    #           f = open(__file__, 'r')
+    #       except FileNotFoundError:  # FileNotFoundError in Python 3
+    #           print(f"ERROR input file not found", file=sys.stderr)
+    #           sys.exit()
+    #       # __file__ = sys.argv[2]
+    #       # # Reading a file
+    #       # poo = 0
+    #       # f = open(__file__, 'r')
+    #       self.run(f, '-p')
+    #       # while (token != ["ENDFILE", ""]): # NOTE: should i read the line by line here?
+    #       #   scan_func(f)
+    #       #   poo += 1
+    #       f.close()
         
-      else: # p is default if no flag
-        if (LAB2_FLAG):
-          if (sys.argv[1] == '-x'):
-            __file__ = sys.argv[2]
-            print('//' + str(__file__))
+    #   else: # p is default if no flag
+    #     if (LAB2_FLAG):
+    #       if (sys.argv[1] == '-x'):
+    #         __file__ = sys.argv[2]
+    #         print('//' + str(__file__))
             
-        else:
-          __file__ = sys.argv[1]  # no flag, so second arg should be a filename
-          print('//' + str(__file__))
+    #     else:
+    #       __file__ = sys.argv[1]  # no flag, so second arg should be a filename
+    #       print('//' + str(__file__))
 
-        # open file
-        try:
-            __file__ = sys.argv[1]
-            f = open(__file__, 'r')
-        except FileNotFoundError:  # FileNotFoundError in Python 3
-            print(f"ERROR input file not found", file=sys.stderr)
-            sys.exit()
-        # __file__ = sys.argv[2]
-        # Reading a file
-        # f = open(__file__, 'r')
-        # start(f, '-p')
-        self.run(f, '-p')
-        if (PRINT_BEFORE):
-            self.ir_list.print_list()
+    #     # open file
+    #     try:
+    #         __file__ = sys.argv[1]
+    #         f = open(__file__, 'r')
+    #     except FileNotFoundError:  # FileNotFoundError in Python 3
+    #         print(f"ERROR input file not found", file=sys.stderr)
+    #         sys.exit()
+    #     # __file__ = sys.argv[2]
+    #     # Reading a file
+    #     # f = open(__file__, 'r')
+    #     # start(f, '-p')
+    #     self.run(f, '-p')
+    #     if (PRINT_BEFORE):
+    #         self.ir_list.print_list()
           
-        f.close()
+    #     f.close()
 
 
 

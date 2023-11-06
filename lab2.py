@@ -51,12 +51,12 @@ class Lab2:
     
         is_rematerializable: list of loadI nodes that are rematerializable 
     """
-    def __init__(self):
+    def __init__(self, file):
         print("IN LAB2 INIT")
         # Get IR
         self.Lab_1 = lab1.Lab1()  # init
 
-        self.Lab_1.main(True, False)
+        self.Lab_1.main(file, True, False)
 
         self.IR_LIST = self.Lab_1.ir_list
         # self.IR_LIST.print_table(self.IR_LIST)
@@ -544,19 +544,11 @@ class Lab2:
     
 
         
-        
-    
 
-
-
-  
-   
-
-
-def main():
+def main(file):
     # pr = cProfile.Profile()
     # pr.enable() 
-    lab2 = Lab2()
+    lab2 = Lab2(file)
 
     lab2.rename()
     if (sys.argv[1] == '-h'):
