@@ -51,6 +51,7 @@ def main():
             sys.exit()
         Lab_2 = lab2.Lab2(f)
         Lab_2.rename()
+        # Only renaming for Lab3, not allocating.
         if (sys.argv[1] == '-lab2'):
             if (sys.argv[2] == '-x'):
                 Lab_2.print_renamed_block()
