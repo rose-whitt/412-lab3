@@ -1,6 +1,5 @@
 digraph DG {
-  1 [label="1:  loadI  8 => r3
-prio:  124"];
+  1 [label="1:  loadI  8 => r3"];
   2 [label="2:  loadI  12 => r4
 prio:  124"];
   3 [label="3:  add    r3, r4  => r0
