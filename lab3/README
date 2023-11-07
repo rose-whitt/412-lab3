@@ -1,0 +1,58 @@
+This directory contains the software to support Lab 3 in COMP 412.
+You should find the following files and directories:
+
+README:	   This file
+
+lab3_ref:  A reference implementation of an ILOC block scheduler
+	   Remember, your task is to write a scheduler, not to duplicate
+	   the behavior of lab3_ref.
+
+	   lab3_ref implements a variety of techniques to disambiguate 
+	   memory references; most were suggested by students in previous
+	   years.
+
+	   lab3_ref has a large number of options. Several may be useful
+	   to you as you debug your own scheduler.
+
+	   	-g : creates a '.dot' file for graphviz
+		     If lab3_ref has dependence trimming enabled,
+		     it creates a '.dot' file before and after it
+		     trims the graph.
+
+		-s : disables dependence trimming for LOAD, STORE, 
+		     & OUTPUT operations
+
+		-n : disables constant propagation.
+
+		-c : dumps the value table after constant propagation.
+
+autograder:  Contains the stripped down lab3 auto-grader and auto-timer.
+	     Follow directions in the README file to unpack and configure it.
+
+documents: This directory contains documents that are relevant to lab 3.
+	   You may find EarlyRelease.pdf interesting; it shows how getting
+	   early release correct affects the schedule on the block report04.i.
+
+	   The NotesOnTarFiles is also found here.
+	   
+scripts:   This directory contains a testing script that should make it 
+	   easier to run your scheduler against directories of ILOC code,
+	   such as the report blocks or the > 500 ILOC blocks found in 
+	   ~comp412/students/ILOC.
+
+report:	   This directory contains the report blocks. Previously, these
+	   were used in the lab report. While we eliminated the lab report,
+	   the various autograders still test against the report blocks.
+
+sim:	   The Lab 3 simulator for ILOC; note that this simulator is 
+	   significantly differen that the simulator for Lab 2. It 
+	   supports multiple operations per cycle and has different
+	   operation latencies that those used in Lab 2.
+
+simulator: This directory contains the source code for the simulator.
+	   If you feel inclined, you can create an executable to run
+	   on your own machine.
+
+
+updated 10/22/2023
+kdc

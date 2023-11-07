@@ -1,0 +1,38 @@
+This directory contains a couple of python scripts intended to help test your 
+lab 3 scheduler. 
+
+   test:  a script for testing correctness
+
+TEST SCRIPT: To use this script, copy it into your file system. 
+The syntax is simple:
+
+   test <executable name>  <directory of ILOC files>
+
+So, to run lab3_ref on the lab3 report blocks, you might type
+
+   ./test ~comp412/students/lab3/lab3_ref  ~comp412/students/lab3/report
+
+The script reports its results in two ways. It prints a brief summary to
+stdout. It writes a logfile in the current directory, named with your netid.
+The logfile contains the outcome on each tested file, along with the cycle
+count for executing the original code and the scheduled code.
+
+If the test script reports that the scheduler under test failed on some 
+file x, that tells you that the scheduled code for that file produced 
+different results than the original code. 
+
+NOTE: The script writes the log file into the directory where it is invoked.
+For that reason, you should copy 'test' into your own file system subtree.
+It overwrites the log file on every run.
+
+Do not try to run multiple instances of the tester from multiple shells on 
+the same machine. The tester creates a directory in /tmp to hold all of the
+miscellaneous files that it creates. Having multiple tester instances sharing
+a single temporary directory will likely produce really bad results.
+
+TIMER: We used to supply a quick timing script. We have removed it. We
+recommend that you use the timing facilities in the autograder and the
+autotimer.
+
+updated 10/22/2023
+kdc

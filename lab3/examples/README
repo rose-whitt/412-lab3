@@ -1,0 +1,7 @@
+This directory contains short ILOC blocks used in the Lab 3 videos.
+Not all of the blocks from the videos are present; some of the blocks
+in the videos use operations (e.g., loadAI) that are not included
+in the ILOC subset for the project.
+
+updated 10/31/2021
+kdc

@@ -1,0 +1,58 @@
+NOTE:  The lab3 simulator has a trace facility that may help you debug
+your schedulers. If you pass '-t' as the first parameter to the simulator,
+it will produce a cycle-by-cycle trace of the execution.
+
+When a multi-cycle operation commits its results, the simulator indicates
+this by appending a cycle number, written as *n, to the cycle in which 
+the operation commits.
+
+For example, the command
+
+    ./lab3_ref report/report1.i | ./sim -t -s 1
+
+executed in the ~comp412/students/lab3 directory produces the following trace
+
+	 Entering simulation, with interlock flag:
+	 	stall_on_branches
+	0:	[loadI 2000 => r20 (2000); loadI 4 => r3 (4)]
+	1:	[load r20 => r18 (0); add r20, r3 => r17 (2004)]
+	2:	[load r17 => r19 (0); add r17, r3 => r16 (2008)]
+	3:	[load r16 => r11 (0); add r16, r3 => r15 (2012)]
+	4:	[load r15 => r10 (0); add r15, r3 => r14 (2016)]
+	5:	[load r14 => r12 (0); add r14, r3 => r2 (2020)] *1
+	6:	[load r2 => r13 (0); add r2, r3 => r0 (2024)] *2
+	7:	[add r18, r19 => r7 (0); nop ] *3
+	8:	[nop ; nop ] *4
+	9:	[add r11, r10 => r6 (0); mult r10, r11 => r9 (0)] *5
+	10:	[add r6, r7 => r5 (0); nop ] *6
+	11:	[nop ; mult r12, r13 => r8 (0)] *9
+	12:	[nop ; nop ]
+	13:	[nop ; nop ] *11
+	14:	[add r8, r9 => r4 (0); nop ]
+	15:	[add r4, r5 => r1 (0); nop ]
+	16:	[store r1 => r0 (0); nop ]
+	17:	[nop ; nop ]
+	18:	[nop ; nop ]
+	19:	[nop ; nop ]
+	20:	[nop ; nop ] *16
+	21:	[output 2024 (0); nop ]
+	output generates => 0
+
+	Executed 22 instructions and 44 operations in 22 cycles.
+
+The first two lines document the interlocks that are in effect for this specific
+run. In this case, -s 1, enables an interlock on branches. (Yes, it is largely
+irrelevant for lab 3.)
+
+After that, the trace shows each cycle's execution.  The first operation
+executes on Functional Unit 0, the second on Funcitonal Unit 1. Notice that
+cycle 1 executes "load r20 => r18".  The parenthetic value tells us that
+the value of the result will be (0).  The notation "*1" on the end of cycle 5
+tells us that the value 0 arrived in r18 at the end of cycle 5.
+
+The parenthetic values are, in general, the result of the operation. Of course,
+the trace for the store operation is quirky; it shows the value from the first
+operand -- the value that will be stored into memory.
+
+
+

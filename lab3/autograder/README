@@ -1,0 +1,11 @@
+COMP 412 Lab 3 Auto-grader
+
+This tar archive contains a stripped down copy of the lab 3 autograder
+and autotimer.
+
+To install it, create a clean directory and unpack the tar file into it.
+You must configure the autograder and the autotimer with the path to the
+directory where it is installed. See the directions in the README file
+that unpacks from the tar archive.
+
+
