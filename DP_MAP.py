@@ -48,14 +48,15 @@ class OperationNode:
         self.into_edges = []       # array of Edges going INTO this node
         self.outof_edges = []       # array of Edges coming OUT OF this node
     
-    def add_into_edge(self, edge):
-        """
+    # def add_into_edge(self, edge):
+    #     """
 
-        """
-        self.into_edges.append(edge)
+    #     """
+        
+    #     self.into_edges.append(edge)
     
-    def add_outof_edge(self, edge):
-        self.outof_edges.append(edge)
+    # def add_outof_edge(self, edge):
+    #     self.outof_edges.append(edge)
 
 
 
@@ -85,7 +86,11 @@ class DependenceGraph:
         node.line_num = ir_list_node.line
         node.ir_list_node = ir_list_node
         node.type = ir_list_node.opcode
-        # TODO: delay, edges
+        
+        
+
+
+        # TODO: delay
 
         # Add to mapping
         # TODO: only do this when it defines
@@ -96,8 +101,54 @@ class DependenceGraph:
         self.nodes_list.append(node);
 
     
+    
+    def add_edge(self, node):
+        print('ADD EDGE')
+        print(node.ir_list_node.arg1)
+        print(node.ir_list_node.arg2)
+        print(node.ir_list_node.arg3)
+        # add out of nodes- data
+        # for each VRj used in o, add an edge from o to the node in M(VRj)
+        # arg1
+        if (node.ir_list_node.arg1[1] != None):
+            into_node = self.VR_TO_NODE[node.ir_list_node.arg1[1]]
+            print('ARG1 INTO NODE: ')
+            self.print_node(into_node)
+            # make the edge
+            edge = Edge()
+            edge.kind = DATA
+            edge.latency = 0    # idk
+            edge.vr = node.ir_list_node.arg1[1]
+            edge.parent = node
+            edge.outof_line_num = node.line_num
+            edge.child = into_node
+            edge.into_line_num = into_node.line_num
 
+            # add the edge to the out of list
+            node.outof_edges.append(edge)
+            # add edge to child's into list
+            into_node.into_edges.append(edge)
 
+        # arg2
+        
+        if (node.ir_list_node.arg2[1] != None):
+            into_node = self.VR_TO_NODE[node.ir_list_node.arg2[1]]
+            print('ARG2 INTO NODE: ')
+            self.print_node(into_node)
+            # make the edge
+            edge = Edge()
+            edge.kind = DATA
+            edge.latency = 0    # idk
+            edge.vr = node.ir_list_node.arg2[1]
+            edge.parent = node
+            edge.outof_line_num = node.line_num
+            edge.child = into_node
+            edge.into_line_num = into_node.line_num
+
+            # add the edge to the out of list
+            node.outof_edges.append(edge)
+            # add edge to child's into list
+            into_node.into_edges.append(edge)
     
     def get_ir_node(self, node):
         """
@@ -130,6 +181,8 @@ class DependenceGraph:
         print("digraph DG {")
         self.print_nodes()
         # self.print_edges()
+        for node in self.nodes_list:
+            self.print_edges(node)
         print("}")
 
     def print_nodes(self):
@@ -150,7 +203,7 @@ class DependenceGraph:
             ret += temp
         print(ret)
     
-    def print_node_from_vrtonode(self, node):
+    def print_node(self, node):
         print("  " + str(node.line_num) + ' [ label="' + str(node.line_num) + ":  " + self.get_ir_node(node.ir_list_node) + ' "];')
 
     def print_vrtonode(self):
@@ -162,26 +215,27 @@ class DependenceGraph:
 
 
     
-    def print_edges(self):
+    def print_edges(self, node):
         """
             format of each node:   3 -> 1 [ label=" Data, vr3"];
               7 -> 6 [ label=" Conflict "];
             <line num of node edge is coming OUT OF (parent)> -> <line num of node edge is going INTO (child)> [ label = " <kind> "];
         """
         ret = ""
-        for key, value in self.edges:
+        
+        for edge in node.outof_edges:
             temp = "  " # indent
-            temp += str(key)   # line num of node edge is coming OUT OF (parent)
+            temp += str(node.line_num)   # line num of node edge is coming OUT OF (parent)
             temp += " -> "
-            temp += str(value.into_line_num)
+            temp += str(edge.into_line_num)
             temp += ' [ label=" '
-            if (value.kind != DATA):
-                temp += self.kinds[value.kind]
+            if (edge.kind != DATA):
+                temp += self.kinds[edge.kind]
                 temp += ' "];'
-            elif (value.kind == DATA):
-                temp += self.kinds[value.kind]
+            elif (edge.kind == DATA):
+                temp += self.kinds[edge.kind]
                 temp += ', vr'
-                temp += value.vr
+                temp += str(edge.vr)
                 temp += ' "];'
             temp += '\n'
             ret += temp
