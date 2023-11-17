@@ -242,19 +242,19 @@ class DependenceGraph:
         print(ret)
     
 
-    # # CHECKING FUNCTIONS
-    # def graph_consistency_checker(self):
-    #     """
-    #         Make sure that if node A thought it had an edge that ran to node B,
-    #           node B also thought it had an edge that ran to node A
-    #     """
-    #     for node in self.nodes_list:
-    #         # for each out edge (ex: edge ran to node b)
-    #         for edge in node.outof_edges:
-    #             # get the child 
-    #             child = edge.child
-    #             # get child's into edges
-    #             into_edges
+    # CHECKING FUNCTIONS
+    def graph_consistency_checker(self):
+        """
+            Make sure that if node A thought it had an edge that ran to node B,
+              node B also thought it had an edge that ran to node A
+        """
+        for node in self.nodes_list:
+            # for each out edge (ex: edge ran to node b)
+            for edge in node.outof_edges:
+                # get the child 
+                child = edge.child
+                # get child's into edges
+                into_edges
 
             
             
