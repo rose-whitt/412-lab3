@@ -1,22 +1,42 @@
 import scanner
-from IR_List import *
+# from IR_List import *
 import lab1
 import lab2
 import sys
 import math
 import cProfile, pstats
 from io import StringIO
+from DP_MAP import *
+
+
+# KINDS
+DATA = 0
+SERIAL = 1
+CONFLICT = 2
+
 
 class Lab3:
     """
     
-        is_rematerializable: list of loadI nodes that are rematerializable 
     """
-    def __init__(self):
-        print("LAB3 INIT")
-    
+    def __init__(self, IR_LIST):
+        self.IR_LIST = IR_LIST
+        self.DP_MAP = DependenceGraph()
+        self.kinds = ["Data", "Serial", "Conflict"]
+
     def dummy(self):
         print("WASSUP BITCH")
+        start = self.IR_LIST.head
+        while (start != None):
+            self.DP_MAP.add_node(start)
+            start = start.next
+        
+        self.DP_MAP.print_dot()
+
+
+    
+
+    
 
 
 def main():
@@ -61,77 +81,8 @@ def main():
                 Lab_2.print_allocated_file()
         # Lab_2.main()
         f.close()
-        Lab_3 = Lab3()
+        Lab_3 = Lab3(Lab_2.IR_LIST)
         Lab_3.dummy()
-
-        # lab2.main()
-        # # check file validity before Lab1, remove that from lab1
-        # if (sys.argv[1] == 'lab2'):
-        #     # file will be sys.argv[3], check file validity
-        #     __file__ = sys.argv[2]
-
-        #     # open file
-        #     try:
-        #         f = open(__file__, 'r')
-        #     except FileNotFoundError:  # FileNotFoundError in Python 3
-        #         print(f"ERROR input file not found", file=sys.stderr)
-        #         sys.exit()
-            
-        #     # initialize lab2/run lab1
-        #     lab2 = lab2.main(f)
-        #     # rename
-        #     if (sys.argv[2] == '-x'):   # print renamed block
-
-        #         f.close()
-
-        #     elif (int(sys.argv[2]) >= 3 and int(sys.argv[2]) <= 64):
-
-        #         f.close()
-
-
-
-
-
-        # __file__ = sys.argv[2]
-
-        # # open file
-        # try:
-        #     f = open(__file__, 'r')
-        # except FileNotFoundError:  # FileNotFoundError in Python 3
-        #     print(f"ERROR input file not found", file=sys.stderr)
-        #     sys.exit()
-        # lab3 = Lab3(f)
-    # if (sys.argv[1] == '-h'):
-    #     print("\n")
-    #     print("Command Syntax:")
-    #     print("     ./412alloc [flag or number of registers] <filename>")
-    #     print("\n")
-    #     print("Required arguments:")
-    #     print("     filename is the pathname (absolute or relative) to the input file. When the flag is '-h', no filename should be specified and nothing after the flag is processed.")
-    #     print("\n")
-    #     print("Optional flags:")
-    #     print("     -h      prints this message")
-    #     print("\n")
-    #     print("At most one of the following three flags:")
-    #     print("     -x      Performs scanning, parsing, renaming on the file and then prints the renamed block to the stdout.")
-    #     print("     [k]       Where k is the number of registers available to the allocator (3<=k<=64).")
-    #     print("                     Scan, parse, rename, and allocate code in the input block given in filename so that it uses")
-    #     print("                     only registers r0 to rk-1 and prints the resulting code in the stdout.")
-
-
-    # elif (sys.argv[1] == '-x'):
-    #     lab2.print_renamed_block()
-    # elif (int(sys.argv[1]) >= 3 and int(sys.argv[1]) <= 64):
-    #     # lab2.allocate(int(sys.argv[1]))
-    #     lab2.dif_alloc(int(sys.argv[1]))
-    #     lab2.print_allocated_file()
-        # lab2.IR_LIST.print_table(lab2.IR_LIST)
-    # pr.disable()
-    # s = StringIO()
-    # sortby = 'cumulative'
-    # ps = pstats.Stats(pr, stream=s).sort_stats(sortby)
-    # ps.print_stats()
-    # sys.stdout.write(s.getvalue())
 
 
 

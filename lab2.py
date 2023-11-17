@@ -362,6 +362,9 @@ class Lab2:
 
    
     def op_defines(self, operand):
+        """
+            The operation defines the register
+        """
         # print("operand: " + str(operand))
         # print("SR_to_VR len: " + str(len(self.SR_to_VR)))
         # print("[op_defines] operand.sr: " + str(operand.sr))

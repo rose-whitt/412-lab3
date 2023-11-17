@@ -11,6 +11,12 @@ DATA = 0
 SERIAL = 1
 CONFLICT = 2
 
+# INDEXES
+SR_IDX = 0
+VR_IDX = 1
+PR_IDX = 2
+NU_IDX = 3
+
 
 class Edge:
     """
@@ -43,6 +49,9 @@ class OperationNode:
         self.outof_edges = []       # array of Edges coming OUT OF this node
     
     def add_into_edge(self, edge):
+        """
+
+        """
         self.into_edges.append(edge)
     
     def add_outof_edge(self, edge):
@@ -57,28 +66,43 @@ class DependenceGraph:
             nodes: map line num (from renamed block) of node to operation node; contains type Node
             edges: map line num of node that the edge is coming OUT OF (parent) to the edge; contains type Edge
         """
-        self.nodes = {} 
+        self.VR_TO_NODE = {}
+        self.nodes_list = []
+
         # map line num of node that the edge is coming OUT OF (parent) to the edge; contains type Edge
-        self.edges = {} 
         self.kinds = ["Data", "Serial", "Conflict"]
         self.opcodes_list = ["load", "store", "loadI", "add", "sub", "mult", "lshift", "rshift", "output", "nop"]
     
-    def add_node(self, node):
+
+    def add_node(self, ir_list_node):
         """
+            Currently only implementing for data nodes
             Add node to nodes map that is keyed by node's line number
             node: node to add to the nodes map
         """
-        self.nodes[node.line_num] = node
+        # Make node
+        node = OperationNode()
+        node.line_num = ir_list_node.line
+        node.ir_list_node = ir_list_node
+        node.type = ir_list_node.opcode
+        # TODO: delay, edges
+
+        # Add to mapping
+        # TODO: only do this when it defines
+        vr = ir_list_node.arg3[1]
+        if vr not in self.VR_TO_NODE:   # first time
+            self.VR_TO_NODE[vr] = node
+        # add to node list
+        self.nodes_list.append(node);
+
     
 
-    def add_edge(self, edge):
-        """
-            Add edge to edges map that is keyed by the line number of the parent node
-        """
-        self.edges[edge.outof_line_num] = edge
+
     
     def get_ir_node(self, node):
-        # print(start)
+        """
+            Given a dependence graph node, returns the IR representation
+        """
         lh = ""
         rh = ""
         
@@ -99,10 +123,13 @@ class DependenceGraph:
         temp = opcode + lh + " " + rh
         return temp
     
-    def print_dg_map(self):
+    def print_dot(self):
+        """
+            Prints the dot file.
+        """
         print("digraph DG {")
         self.print_nodes()
-        self.print_edges()
+        # self.print_edges()
         print("}")
 
     def print_nodes(self):
@@ -110,13 +137,13 @@ class DependenceGraph:
             format:   1 [label="1:  loadI  8 => r3"];
         """
         ret = ""
-        for key, value in self.nodes:
+        for node in self.nodes_list:
             temp = "  " # indent
-            temp += str(key)
+            temp += str(node.line_num)
             temp += ' [ label="'
-            temp += str(value.line_num)
+            temp += str(node.line_num)
             temp += ":  "
-            poo = self.get_ir_node(value.ir_list_node)
+            poo = self.get_ir_node(node.ir_list_node)
             temp += poo
             temp += ' "];'
             temp += '\n'

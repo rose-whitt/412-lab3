@@ -1,0 +1,1 @@
+run reference: ~comp412/students/lab3/lab3_ref -s -g ./dgslide4.i
