@@ -45,8 +45,8 @@ class OperationNode:
         self.ir_list_node = None # type- Node in IR_List.py; reference to the node in the IR_List that corresponds to this operation node
         self.type = None    # opcode
         self.delay = None     # latency of that opcode
-        self.into_edges = []       # array of Edges going INTO this node
-        self.outof_edges = []       # array of Edges coming OUT OF this node
+        self.into_edges = {}      # Edges going INTO this node; line num of parent mapped to edge between this node and parent
+        self.outof_edges = {}       # Edges coming OUT OF this node; line num of child mapped to edge between this node and child
     
     # def add_into_edge(self, edge):
     #     """
@@ -124,10 +124,10 @@ class DependenceGraph:
             edge.child = into_node
             edge.into_line_num = into_node.line_num
 
-            # add the edge to the out of list
-            node.outof_edges.append(edge)
-            # add edge to child's into list
-            into_node.into_edges.append(edge)
+            # add the edge to the out of map
+            node.outof_edges[into_node.line_num] = edge
+            # add edge to child's into map
+            into_node.into_edges[node.line_num] = edge
 
         # arg2
         
@@ -145,10 +145,10 @@ class DependenceGraph:
             edge.child = into_node
             edge.into_line_num = into_node.line_num
 
-            # add the edge to the out of list
-            node.outof_edges.append(edge)
-            # add edge to child's into list
-            into_node.into_edges.append(edge)
+            # add the edge to the out of map
+            node.outof_edges[into_node.line_num] = edge
+            # add edge to child's into map
+            into_node.into_edges[node.line_num] = edge
     
     def get_ir_node(self, node):
         """
@@ -223,11 +223,11 @@ class DependenceGraph:
         """
         ret = ""
         
-        for edge in node.outof_edges:
+        for key, edge in node.outof_edges.items():
             temp = "  " # indent
             temp += str(node.line_num)   # line num of node edge is coming OUT OF (parent)
             temp += " -> "
-            temp += str(edge.into_line_num)
+            temp += str(key) # edge.into_line_num
             temp += ' [ label=" '
             if (edge.kind != DATA):
                 temp += self.kinds[edge.kind]
@@ -240,6 +240,21 @@ class DependenceGraph:
             temp += '\n'
             ret += temp
         print(ret)
+    
+
+    # # CHECKING FUNCTIONS
+    # def graph_consistency_checker(self):
+    #     """
+    #         Make sure that if node A thought it had an edge that ran to node B,
+    #           node B also thought it had an edge that ran to node A
+    #     """
+    #     for node in self.nodes_list:
+    #         # for each out edge (ex: edge ran to node b)
+    #         for edge in node.outof_edges:
+    #             # get the child 
+    #             child = edge.child
+    #             # get child's into edges
+    #             into_edges
 
             
             

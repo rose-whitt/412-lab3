@@ -56,46 +56,46 @@ class Lab3:
         
         self.DP_MAP.print_dot()
         self.DP_MAP.print_vrtonode()
-        for node in self.DP_MAP.nodes_list:
-            print("node: " + str(node.line_num))
-            print("OUT OF EDGES SIZE: " + str(len(node.outof_edges)))
-            ret = ""
-            for edge in node.outof_edges:
-                temp = "  " # indent
-                temp += str(node.line_num)   # line num of node edge is coming OUT OF (parent)
-                temp += " -> "
-                temp += str(edge.into_line_num)
-                temp += ' [ label=" '
-                if (edge.kind != DATA):
-                    temp += self.kinds[edge.kind]
-                    temp += ' "];'
-                elif (edge.kind == DATA):
-                    temp += self.kinds[edge.kind]
-                    temp += ', vr'
-                    temp += str(edge.vr)
-                    temp += ' "];'
-                temp += '\n'
-                ret += temp
-            print(ret)
-            print("INTO EDGES SIZE: " + str(len(node.into_edges)))
-            ret = ""
-            for edge in node.into_edges:
-                temp = "  " # indent
-                temp += str(node.line_num)   # line num of node edge is coming OUT OF (parent)
-                temp += " -> "
-                temp += str(edge.into_line_num)
-                temp += ' [ label=" '
-                if (edge.kind != DATA):
-                    temp += self.kinds[edge.kind]
-                    temp += ' "];'
-                elif (edge.kind == DATA):
-                    temp += self.kinds[edge.kind]
-                    temp += ', vr'
-                    temp += str(edge.vr)
-                    temp += ' "];'
-                temp += '\n'
-                ret += temp
-            print(ret)
+        # for node in self.DP_MAP.nodes_list:
+        #     print("node: " + str(node.line_num))
+        #     print("OUT OF EDGES SIZE: " + str(len(node.outof_edges)))
+        #     ret = ""
+        #     for edge in node.outof_edges:
+        #         temp = "  " # indent
+        #         temp += str(node.line_num)   # line num of node edge is coming OUT OF (parent)
+        #         temp += " -> "
+        #         temp += str(edge.into_line_num)
+        #         temp += ' [ label=" '
+        #         if (edge.kind != DATA):
+        #             temp += self.kinds[edge.kind]
+        #             temp += ' "];'
+        #         elif (edge.kind == DATA):
+        #             temp += self.kinds[edge.kind]
+        #             temp += ', vr'
+        #             temp += str(edge.vr)
+        #             temp += ' "];'
+        #         temp += '\n'
+        #         ret += temp
+        #     print(ret)
+        #     print("INTO EDGES SIZE: " + str(len(node.into_edges)))
+        #     ret = ""
+        #     for edge in node.into_edges:
+        #         temp = "  " # indent
+        #         temp += str(node.line_num)   # line num of node edge is coming OUT OF (parent)
+        #         temp += " -> "
+        #         temp += str(edge.into_line_num)
+        #         temp += ' [ label=" '
+        #         if (edge.kind != DATA):
+        #             temp += self.kinds[edge.kind]
+        #             temp += ' "];'
+        #         elif (edge.kind == DATA):
+        #             temp += self.kinds[edge.kind]
+        #             temp += ', vr'
+        #             temp += str(edge.vr)
+        #             temp += ' "];'
+        #         temp += '\n'
+        #         ret += temp
+        #     print(ret)
 
 
 
