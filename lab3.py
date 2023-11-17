@@ -9,6 +9,26 @@ from io import StringIO
 from DP_MAP import *
 
 
+CATEGORIES = ["MEMOP", "LOADI", "ARITHOP", "OUTPUT", "NOP", "CONST", "REG", "COMMA", "INTO", "ENDFILE", "NEWLINE"]
+# only want to process opcodes with registers, which is index 0 through 7
+opcodes_list = ["load", "store", "loadI", "add", "sub", "mult", "lshift", "rshift", "output", "nop"]
+
+LOAD_OP = 0
+STORE_OP = 1
+LOADI_OP = 2
+ADD_OP = 3
+SUB_OP = 4
+MULT_OP = 5
+LSHIFT_OP = 6
+RSHIFT_OP = 7
+OUTPUT_OP = 8
+NOP_OP = 9
+
+# MACROS
+INVALID = -1
+INF = math.inf
+
+
 # KINDS
 DATA = 0
 SERIAL = 1
@@ -32,6 +52,7 @@ class Lab3:
             start = start.next
         
         self.DP_MAP.print_dot()
+        self.DP_MAP.print_vrtonode()
 
 
     

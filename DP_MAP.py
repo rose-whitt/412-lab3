@@ -90,7 +90,7 @@ class DependenceGraph:
         # Add to mapping
         # TODO: only do this when it defines
         vr = ir_list_node.arg3[1]
-        if vr not in self.VR_TO_NODE:   # first time
+        if vr not in self.VR_TO_NODE and vr != None:   # first time
             self.VR_TO_NODE[vr] = node
         # add to node list
         self.nodes_list.append(node);
@@ -149,7 +149,17 @@ class DependenceGraph:
             temp += '\n'
             ret += temp
         print(ret)
+    
+    def print_node_from_vrtonode(self, node):
+        print("  " + str(node.line_num) + ' [ label="' + str(node.line_num) + ":  " + self.get_ir_node(node.ir_list_node) + ' "];')
+
+    def print_vrtonode(self):
+        print("VR_TO_NODE = {")
+        for key, value in self.VR_TO_NODE.items():
+            print("r" + str(key) + ": (" + str(value.line_num) + ' [ label="' + str(value.line_num) + ":  " + self.get_ir_node(value.ir_list_node) + ' "];' +")")
         
+        print("}")
+
 
     
     def print_edges(self):
