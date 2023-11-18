@@ -167,6 +167,24 @@ class DependenceGraph:
         self.nodes_map[node.line_num]= node
         return node
 
+    def add_conflict_edge(self, parent_node, child_node):
+        """
+            Add a serial edge from parent_node to child_node
+        """
+        print("ADD CONFLICR EDGE")
+        edge = Edge()
+        edge.kind = CONFLICT
+        edge.latency = 0 # idk
+        edge.parent = parent_node
+        edge.outof_line_num = parent_node.line_num
+        edge.child = child_node
+        edge.into_line_num = child_node.line_num
+
+        # add the edge to the out of map
+        parent_node.outof_edges[child_node.line_num] = edge
+        # add edge to child's into map
+        child_node.into_edges[parent_node.line_num] = edge
+
     def add_serial_edge(self, parent_node, child_node):
         """
             Add a serial edge from parent_node to child_node
