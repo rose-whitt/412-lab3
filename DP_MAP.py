@@ -136,7 +136,7 @@ class DependenceGraph:
             edges: map line num of node that the edge is coming OUT OF (parent) to the edge; contains type Edge
         """
         self.VR_TO_NODE = {}
-        self.nodes_list = []
+        self.nodes_map = {} # line num to node
 
         # map line num of node that the edge is coming OUT OF (parent) to the edge; contains type Edge
         self.kinds = ["Data", "Serial", "Conflict"]
@@ -164,17 +164,37 @@ class DependenceGraph:
         if vr not in self.VR_TO_NODE and vr != None:   # first time
             self.VR_TO_NODE[vr] = node
         # add to node list
-        self.nodes_list.append(node);
+        self.nodes_map[node.line_num]= node
         return node
 
-    
-    
-    def add_edge(self, node):
+    def add_serial_edge(self, parent_node, child_node):
         """
-            Add an edge
+            Add a serial edge from parent_node to child_node
+        """
+        print("ADD SERIAL EDGE")
+        edge = Edge()
+        edge.kind = SERIAL
+        edge.latency = 1 # "one cycle latency is enough"
+        edge.parent = parent_node
+        edge.outof_line_num = parent_node.line_num
+        edge.child = child_node
+        edge.into_line_num = child_node.line_num
+
+        # add the edge to the out of map
+        parent_node.outof_edges[child_node.line_num] = edge
+        # add edge to child's into map
+        child_node.into_edges[parent_node.line_num] = edge
+
+
+
+
+    
+    def add_data_edge(self, node):
+        """
+            Add a data edge
             for each VRj used in o, add an edge from o to the node in M(VRj)
         """
-        print('ADD EDGE')
+        print('ADD DATA EDGE')
         print(node.ir_list_node.arg1)
         print(node.ir_list_node.arg2)
         print(node.ir_list_node.arg3)
@@ -271,7 +291,7 @@ class DependenceGraph:
         print("digraph DG {")
         self.print_nodes()
         # self.print_edges()
-        for node in self.nodes_list:
+        for line_num, node in self.nodes_map.items():
             self.print_edges(node)
         print("}")
 
@@ -280,7 +300,7 @@ class DependenceGraph:
             format:   1 [label="1:  loadI  8 => r3"];
         """
         ret = ""
-        for node in self.nodes_list:
+        for line_num, node in self.nodes_map.items():
             temp = "  " # indent
             temp += str(node.line_num)
             temp += ' [ label="'
@@ -341,7 +361,7 @@ class DependenceGraph:
         total_count = 0
         success_count = 0
         fail_count = 0
-        for node in self.nodes_list:
+        for line_num, node in self.nodes_map.items():
             # print(node)
             # for each out edge (ex: edge ran to node b)
             for child_linenum, edge in node.outof_edges.items():

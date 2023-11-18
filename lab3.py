@@ -52,7 +52,7 @@ class Lab3:
             # if o defines vri, sets vr_to_node[vri] = node
             tmp_node = self.DP_MAP.add_node(start)
             # for each vrj used in o, add an edge from o to the node in M(vrj)
-            self.DP_MAP.add_edge(tmp_node)
+            self.DP_MAP.add_data_edge(tmp_node)
 
             # if o is a load, store or output operation, add edges to ensure serialization of memory ops
             if (start.opcode == LOAD_OP):
@@ -61,6 +61,11 @@ class Lab3:
                 print("operation is store- possible serial or conflict")
             elif (start.opcode == OUTPUT_OP):
                 print("operation is output- possible serial or conflict")
+                # output to output- serial edge
+                # check if there is another output in the nodes map
+                for other_node in self.DP_MAP.nodes_map.values():
+                    if other_node.type == OUTPUT_OP and other_node != tmp_node:
+                        self.DP_MAP.add_serial_edge(tmp_node, other_node)
 
 
             start = start.next
@@ -71,46 +76,7 @@ class Lab3:
         self.DP_MAP.print_dot()
         self.DP_MAP.print_vrtonode()
         self.DP_MAP.graph_consistency_checker()
-        # for node in self.DP_MAP.nodes_list:
-        #     print("node: " + str(node.line_num))
-        #     print("OUT OF EDGES SIZE: " + str(len(node.outof_edges)))
-        #     ret = ""
-        #     for edge in node.outof_edges:
-        #         temp = "  " # indent
-        #         temp += str(node.line_num)   # line num of node edge is coming OUT OF (parent)
-        #         temp += " -> "
-        #         temp += str(edge.into_line_num)
-        #         temp += ' [ label=" '
-        #         if (edge.kind != DATA):
-        #             temp += self.kinds[edge.kind]
-        #             temp += ' "];'
-        #         elif (edge.kind == DATA):
-        #             temp += self.kinds[edge.kind]
-        #             temp += ', vr'
-        #             temp += str(edge.vr)
-        #             temp += ' "];'
-        #         temp += '\n'
-        #         ret += temp
-        #     print(ret)
-        #     print("INTO EDGES SIZE: " + str(len(node.into_edges)))
-        #     ret = ""
-        #     for edge in node.into_edges:
-        #         temp = "  " # indent
-        #         temp += str(node.line_num)   # line num of node edge is coming OUT OF (parent)
-        #         temp += " -> "
-        #         temp += str(edge.into_line_num)
-        #         temp += ' [ label=" '
-        #         if (edge.kind != DATA):
-        #             temp += self.kinds[edge.kind]
-        #             temp += ' "];'
-        #         elif (edge.kind == DATA):
-        #             temp += self.kinds[edge.kind]
-        #             temp += ', vr'
-        #             temp += str(edge.vr)
-        #             temp += ' "];'
-        #         temp += '\n'
-        #         ret += temp
-        #     print(ret)
+       
 
 
 
