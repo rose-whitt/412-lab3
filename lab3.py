@@ -48,11 +48,25 @@ class Lab3:
         print("WASSUP BITCH")
         start = self.IR_LIST.head
         while (start != None):
-            self.DP_MAP.add_node(start)
+            # creates node for o
+            # if o defines vri, sets vr_to_node[vri] = node
+            tmp_node = self.DP_MAP.add_node(start)
+            # for each vrj used in o, add an edge from o to the node in M(vrj)
+            self.DP_MAP.add_edge(tmp_node)
+
+            # if o is a load, store or output operation, add edges to ensure serialization of memory ops
+            if (start.opcode == LOAD_OP):
+                print("operation is load- possible serial or conflict")
+            elif (start.opcode == STORE_OP):
+                print("operation is store- possible serial or conflict")
+            elif (start.opcode == OUTPUT_OP):
+                print("operation is output- possible serial or conflict")
+
+
             start = start.next
         
-        for node in self.DP_MAP.nodes_list:
-            self.DP_MAP.add_edge(node)
+        # for node in self.DP_MAP.nodes_list:
+        #     self.DP_MAP.add_edge(node)
         
         self.DP_MAP.print_dot()
         self.DP_MAP.print_vrtonode()

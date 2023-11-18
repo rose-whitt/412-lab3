@@ -17,6 +17,17 @@ VR_IDX = 1
 PR_IDX = 2
 NU_IDX = 3
 
+LOAD_OP = 0
+STORE_OP = 1
+LOADI_OP = 2
+ADD_OP = 3
+SUB_OP = 4
+MULT_OP = 5
+LSHIFT_OP = 6
+RSHIFT_OP = 7
+OUTPUT_OP = 8
+NOP_OP = 9
+
 opcodes_list = ["load", "store", "loadI", "add", "sub", "mult", "lshift", "rshift", "output", "nop"]
 
 
@@ -138,15 +149,13 @@ class DependenceGraph:
             Add node to nodes map that is keyed by node's line number
             node: node to add to the nodes map
         """
+        print("ADD NODE")
         # Make node
         node = OperationNode()
         node.line_num = ir_list_node.line
         node.ir_list_node = ir_list_node
         node.type = ir_list_node.opcode
-        
-        
-
-
+  
         # TODO: delay
 
         # Add to mapping
@@ -156,10 +165,15 @@ class DependenceGraph:
             self.VR_TO_NODE[vr] = node
         # add to node list
         self.nodes_list.append(node);
+        return node
 
     
     
     def add_edge(self, node):
+        """
+            Add an edge
+            for each VRj used in o, add an edge from o to the node in M(VRj)
+        """
         print('ADD EDGE')
         print(node.ir_list_node.arg1)
         print(node.ir_list_node.arg2)
@@ -197,6 +211,25 @@ class DependenceGraph:
             edge.kind = DATA
             edge.latency = 0    # idk
             edge.vr = node.ir_list_node.arg2[1]
+            edge.parent = node
+            edge.outof_line_num = node.line_num
+            edge.child = into_node
+            edge.into_line_num = into_node.line_num
+
+            # add the edge to the out of map
+            node.outof_edges[into_node.line_num] = edge
+            # add edge to child's into map
+            into_node.into_edges[node.line_num] = edge
+        
+        if (node.ir_list_node.arg3[1] != None and node.ir_list_node.opcode == STORE_OP):
+            into_node = self.VR_TO_NODE[node.ir_list_node.arg3[1]]
+            print('ARG3 INTO NODE: ')
+            self.print_node(into_node)
+            # make the edge
+            edge = Edge()
+            edge.kind = DATA
+            edge.latency = 0    # idk
+            edge.vr = node.ir_list_node.arg3[1]
             edge.parent = node
             edge.outof_line_num = node.line_num
             edge.child = into_node
@@ -305,10 +338,14 @@ class DependenceGraph:
             Make sure that if node A thought it had an edge that ran to node B,
               node B also thought it had an edge that ran to node A
         """
+        total_count = 0
+        success_count = 0
+        fail_count = 0
         for node in self.nodes_list:
-            print(node)
+            # print(node)
             # for each out edge (ex: edge ran to node b)
             for child_linenum, edge in node.outof_edges.items():
+                total_count += 1
                 # get the child 
                 child = edge.child
                 # get child's into edges
@@ -317,9 +354,12 @@ class DependenceGraph:
                 value_to_check = edge
                 # Check if the key is in into_edges and if the corresponding value matches
                 if key_to_check in into_edges and into_edges[key_to_check] == value_to_check:
-                    print(f"The key-value (parent node linenum, edge) pair ({key_to_check}: {value_to_check}) exists in into_edges.")
+                    success_count += 1
+                    # print(f"The key-value (parent node linenum, edge) pair ({key_to_check}: {value_to_check}) exists in into_edges.")
                 else:
                     print(f"The key-value (parent node linenum, edge) pair ({key_to_check}: {value_to_check}) does not exist in into_edges.")
+                    fail_count += 1
+        print(str(success_count) + " / " + str(total_count) + " into/outof edges correct")
 
                 
 
