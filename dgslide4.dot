@@ -1,0 +1,14 @@
+digraph DG {
+  1 [label="1:  loadI  8 => r1
+prio:  42"];
+  2 [label="2:  loadI  12 => r3
+prio:  42"];
+  3 [label="3:  mult   r1, r3  => r2
+prio:  31"];
+  4 [label="4:  add    r1, r2  => r0
+prio:  0"];
+  3 -> 1 [ label=" Data, vr1"];
+  3 -> 2 [ label=" Data, vr3"];
+  4 -> 1 [ label=" Data, vr1"];
+  4 -> 3 [ label=" Data, vr2"];
+}
