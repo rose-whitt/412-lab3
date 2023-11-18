@@ -57,17 +57,22 @@ class Lab3:
             # if o is a load, store or output operation, add edges to ensure serialization of memory ops
             # variables to make sure we only add the most recent one
             OUTPUT_RAW = False  # parent = output, child = store
+            STORE_WAW = False   # parent = store, child = store
             if (start.opcode == LOAD_OP or start.opcode == STORE_OP or start.opcode == OUTPUT_OP):
                 tmp_node_list = list(self.DP_MAP.nodes_map.values())
                 # reverse so it starts from most recent node to farthest away node
                 for other_node in reversed(tmp_node_list):
                     # either output to output (serial) or output to store (conflict)
                     if (tmp_node.type == OUTPUT_OP):
-                        if (other_node.type == OUTPUT_OP and other_node != tmp_node):
+                        if (other_node.type == OUTPUT_OP and other_node != tmp_node):   # TODO: maybe OUTPU_WAR variable so its the most recent output?
                             self.DP_MAP.add_serial_edge(tmp_node, other_node)
                         if (other_node.type == STORE_OP and OUTPUT_RAW == False):
                             self.DP_MAP.add_conflict_edge(tmp_node, other_node)
                             OUTPUT_RAW = True   # only go to most recent store
+                    elif (tmp_node.type == STORE_OP):
+                        if (other_node.type == STORE_OP and other_node != tmp_node and STORE_WAW == False):
+                            self.DP_MAP.add_serial_edge(tmp_node, other_node)
+                            STORE_WAW = True
 
 
 
