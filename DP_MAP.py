@@ -17,6 +17,9 @@ VR_IDX = 1
 PR_IDX = 2
 NU_IDX = 3
 
+opcodes_list = ["load", "store", "loadI", "add", "sub", "mult", "lshift", "rshift", "output", "nop"]
+
+
 
 class Edge:
     """
@@ -37,6 +40,21 @@ class Edge:
         self.outof_line_num = None  # line num of parent node
         self.child = None   # type- OperationNode; where the edge is going INTO (i.e. the side that has the arrow)
         self.into_line_num = None   # line num of child node
+    def __str__(self):
+        temp_str = ""
+        if (self.kind == DATA):
+            tmp = "DATA, vr" + str(self.vr)
+            temp_str += tmp
+        elif (self.kind == SERIAL):
+            tmp = "SERIAL"
+            temp_str += tmp
+        elif (self.kind == CONFLICT):
+            tmp = "CONFLICT"
+            temp_str += tmp
+
+        temp = " - parent line num: " + str(self.outof_line_num) + "; child line num: " + str(self.into_line_num)
+        temp_str += temp
+        return temp_str
 
 
 class OperationNode:
@@ -48,6 +66,45 @@ class OperationNode:
         self.into_edges = {}      # Edges going INTO this node; line num of parent mapped to edge between this node and parent
         self.outof_edges = {}       # Edges coming OUT OF this node; line num of child mapped to edge between this node and child
     
+    def __str__(self):
+        temp_str = ""
+        temp_str += str(self.line_num)
+        temp_str += ": "
+        ir_node = self.node_get_ir_node(self.ir_list_node)
+        temp_str += ir_node
+        temp_str += " num into edges: "
+        temp_str += str(len(self.into_edges))
+        temp_str += " ; num out of edges: "
+        temp_str += str(len(self.outof_edges))
+        return temp_str
+
+
+
+
+
+    def node_get_ir_node(self, node):
+        """
+            Given a dependence graph node, returns the IR representation
+        """
+        lh = ""
+        rh = ""
+        
+        if (node.opcode == 0 or node.opcode == 1): # MEMOP
+            lh = "r" + str(node.arg1[VR_IDX])
+        elif (node.opcode == 2): # LOADI
+            lh = str(node.arg1[SR_IDX])
+        elif (node.opcode >= 3 and node.opcode <= 7):  # ARITHOP
+            lh = "r" + str(node.arg1[VR_IDX]) + ",r" + str(node.arg2[VR_IDX]) 
+        elif (node.opcode == 8): # OUTPUT
+            lh = str(node.arg1[SR_IDX])
+        
+        if (node.opcode != 8):
+            rh = "=> r" + str(node.arg3[VR_IDX])
+
+        opcode = opcodes_list[node.opcode] + " "
+
+        temp = opcode + lh + " " + rh
+        return temp
     # def add_into_edge(self, edge):
     #     """
 
@@ -249,12 +306,22 @@ class DependenceGraph:
               node B also thought it had an edge that ran to node A
         """
         for node in self.nodes_list:
+            print(node)
             # for each out edge (ex: edge ran to node b)
-            for edge in node.outof_edges:
+            for child_linenum, edge in node.outof_edges.items():
                 # get the child 
                 child = edge.child
                 # get child's into edges
-                into_edges
+                into_edges = child.into_edges   # key == node.linenum ()
+                key_to_check = node.line_num
+                value_to_check = edge
+                # Check if the key is in into_edges and if the corresponding value matches
+                if key_to_check in into_edges and into_edges[key_to_check] == value_to_check:
+                    print(f"The key-value (parent node linenum, edge) pair ({key_to_check}: {value_to_check}) exists in into_edges.")
+                else:
+                    print(f"The key-value (parent node linenum, edge) pair ({key_to_check}: {value_to_check}) does not exist in into_edges.")
+
+                
 
             
             

@@ -56,6 +56,7 @@ class Lab3:
         
         self.DP_MAP.print_dot()
         self.DP_MAP.print_vrtonode()
+        self.DP_MAP.graph_consistency_checker()
         # for node in self.DP_MAP.nodes_list:
         #     print("node: " + str(node.line_num))
         #     print("OUT OF EDGES SIZE: " + str(len(node.outof_edges)))
