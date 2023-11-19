@@ -50,9 +50,9 @@ class Lab3:
         while (start != None):
             # creates node for o
             # if o defines vri, sets vr_to_node[vri] = node
-            tmp_node = self.DP_MAP.add_node(start)
+            tmp_node = self.DP_MAP.add_node(start)  # always adds node
             # for each vrj used in o, add an edge from o to the node in M(vrj)
-            self.DP_MAP.add_data_edge(tmp_node)
+            self.DP_MAP.add_data_edge(tmp_node) # doesnt always add edge, conditions to add are in function
 
             # if o is a load, store or output operation, add edges to ensure serialization of memory ops
             # variables to make sure we only add the most recent one
@@ -82,7 +82,7 @@ class Lab3:
                         if (other_node.type == STORE_OP and other_node != tmp_node and STORE_WAW == False):
                             self.DP_MAP.add_serial_edge(tmp_node, other_node)
                             STORE_WAW = True
-                        if (other_node.type == LOAD_OP):
+                        if (other_node.type == LOAD_OP and self.check_for_edge(tmp_node, other_node) == False):
                             self.DP_MAP.add_serial_edge(tmp_node, other_node)
                         if (other_node.type == OUTPUT_OP):
                             self.DP_MAP.add_serial_edge(tmp_node, other_node)
@@ -91,31 +91,36 @@ class Lab3:
                             self.DP_MAP.add_conflict_edge(tmp_node, other_node)
                             LOAD_RAW = True
 
-                        
-
-
-
-            if (start.opcode == LOAD_OP):
-                print("operation is load- possible serial or conflict")
-            elif (start.opcode == STORE_OP):
-                print("operation is store- possible serial or conflict")
-            elif (start.opcode == OUTPUT_OP):
-                print("operation is output- possible serial or conflict")
-                # output to output- serial edge
-                # check if there is another output in the nodes map
-                for other_node in self.DP_MAP.nodes_map.values():
-                    if other_node.type == OUTPUT_OP and other_node != tmp_node:
-                        self.DP_MAP.add_serial_edge(tmp_node, other_node)
-
-
             start = start.next
-        
-        # for node in self.DP_MAP.nodes_list:
-        #     self.DP_MAP.add_edge(node)
+
         
         self.DP_MAP.print_dot()
         self.DP_MAP.print_vrtonode()
         self.DP_MAP.graph_consistency_checker()
+    
+    def check_for_edge(self, parent_node, child_node):
+        """
+            Check if a data edge already exists.
+            True if data edge exists and we dont want to add new special edge type
+            False if data edge doesn't exist therefore we may want to add new special edge type
+            slide 17- "Theoretically, there would be a serial edge from 6 to 4 and 6 to 5.
+              BUT since there is already the data edge (“flow dependence with a longer latency”??)
+                from 6 to 4 it would be redundant to add a serial edge as well.
+                  It wouldnt be incorrect ot add it, but it would add extra time and work.
+                    Also the reference doesnt do that."
+        """
+        print("[check_for_edge]")
+        # see if child_node.line_num is in parent_node.outofedges
+        if (child_node.line_num in parent_node.outof_edges):
+            print("[check_for_edge] an edge exists already btwn parent and child")
+            edge = parent_node.outof_edges[child_node.line_num]
+            print(edge)
+            if (edge.kind == DATA):
+                print("[check_for_edge] the edge between parent and child is a data edge. do not add new special edge.")
+                return True
+        return False
+                
+
        
 
 

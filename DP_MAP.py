@@ -364,7 +364,7 @@ class DependenceGraph:
                 temp += self.kinds[edge.kind]
                 temp += ', vr'
                 temp += str(edge.vr)
-                temp += ' "];'
+                temp += '"];'
             temp += '\n'
             ret += temp
         print(ret)
