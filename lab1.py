@@ -13,7 +13,7 @@ NU_IDX = 3
 
 class Lab1:
   def __init__(self):
-    print("LAB1 init")
+    # print("LAB1 init")
 
     self.ir_list = LinkedList()
     self.EOF_FLAG = False
@@ -363,10 +363,16 @@ class Lab1:
         token = scan.get_token()
       
       # print(str(len(scan.OPS)) + " valid ILOC operations: " + str(scan.OPS))
-      if ((scan.num_parser_errors + scan.num_scanner_errors) == 0):
-        print("//Parse succeeded, finding " + str(scan.num_iloc_ops) + " ILOC operations.")
-      else:
+      # if ((scan.num_parser_errors + scan.num_scanner_errors) == 0):
+      #   print("//Parse succeeded, finding " + str(scan.num_iloc_ops) + " ILOC operations.")
+      # else:
+      #   sys.stderr.write("Found " + str(scan.num_parser_errors + scan.num_scanner_errors) + " errors on " + str(scan.num_error_lines) + " lines\n")
+      
+      if ((scan.num_parser_errors + scan.num_scanner_errors) != 0):
         sys.stderr.write("Found " + str(scan.num_parser_errors + scan.num_scanner_errors) + " errors on " + str(scan.num_error_lines) + " lines\n")
+         
+
+      
         
       # print(str(scan.num_iloc_ops) + " valid ILOC operations")
     #   print(str(scan.num_parser_errors) + " parser errors.")
@@ -387,7 +393,7 @@ class Lab1:
     #     the if statements
 
 
-    print("LAB1 MAIN")
+    # print("LAB1 MAIN")
     
        
 

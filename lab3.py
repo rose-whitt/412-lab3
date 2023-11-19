@@ -39,13 +39,15 @@ class Lab3:
     """
     
     """
-    def __init__(self, IR_LIST):
+    def __init__(self, IR_LIST, DEBUG_FLAG):
         self.IR_LIST = IR_LIST
-        self.DP_MAP = DependenceGraph()
+        self.DEBUG_FLAG = DEBUG_FLAG
+        self.DP_MAP = DependenceGraph(DEBUG_FLAG)
         self.kinds = ["Data", "Serial", "Conflict"]
+        print ("LAB3 INIT- DEBUG FLAG: " + str(self.DEBUG_FLAG))
 
-    def dummy(self):
-        print("WASSUP BITCH")
+    def build_graph(self):
+        # print("WASSUP BITCH")
         start = self.IR_LIST.head
         while (start != None):
             # creates node for o
@@ -109,14 +111,14 @@ class Lab3:
                   It wouldnt be incorrect ot add it, but it would add extra time and work.
                     Also the reference doesnt do that."
         """
-        print("[check_for_edge]")
+        # print("[check_for_edge]")
         # see if child_node.line_num is in parent_node.outofedges
         if (child_node.line_num in parent_node.outof_edges):
-            print("[check_for_edge] an edge exists already btwn parent and child")
+            # print("[check_for_edge] an edge exists already btwn parent and child")
             edge = parent_node.outof_edges[child_node.line_num]
             print(edge)
             if (edge.kind == DATA):
-                print("[check_for_edge] the edge between parent and child is a data edge. do not add new special edge.")
+                # print("[check_for_edge] the edge between parent and child is a data edge. do not add new special edge.")
                 return True
         return False
                 
@@ -133,8 +135,8 @@ class Lab3:
 def main():
     # pr = cProfile.Profile()
     # pr.enable() 
-    print("in lab3 main")
-    print(sys.argv)
+    # print("in lab3 main")
+    # print(sys.argv)
     if (sys.argv[1] == '-h'):
         print("HELP: FUNCTIONALITY AND COMMAND LINE FLAGS")
         print("     - the file is checked for validity in lab3, i.e. before it is passed into lab2, lab1.")
@@ -148,6 +150,8 @@ def main():
         print("                     Scan, parse, rename, and allocate code in the input block given in filename so that it uses")
         print("                     only registers r0 to rk-1 and prints the resulting code in the stdout.")
         print("     [filename]          Runs lab3, i.e. used to invoke schedule shit.")
+        print("     -x [filename]          Debugging for lab3. Runs lab3 like normal but prints extra info for debugging like latency in nodes in graph/dot file, VR_TO_NODE map, and any other things I decide.")
+
     else:
 
         arg_len = len(sys.argv)
@@ -172,8 +176,13 @@ def main():
                 Lab_2.print_allocated_file()
         # Lab_2.main()
         f.close()
-        Lab_3 = Lab3(Lab_2.IR_LIST)
-        Lab_3.dummy()
+        DEBUG_FLAG = False
+        if (sys.argv[1] == '-x'):
+            DEBUG_FLAG = True
+
+        
+        Lab_3 = Lab3(Lab_2.IR_LIST, DEBUG_FLAG)
+        Lab_3.build_graph()
 
 
 

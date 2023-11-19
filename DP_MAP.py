@@ -1,10 +1,15 @@
 
-# ASSUMED DELAYS
-LOAD_DELAY = 3  # TODO: need to do calculation on pag 637
-LOADI_DELAY = 1
-LSHIFT_DELAY = 1
-ADD_DELAY = 2
-STORE_DELAY = 4
+# LATENCIES (HANDOUT APPENDIX B)
+LOAD_LATENCY = 5
+LOADI_LATENCY = 1
+STORE_LATENCY = 5
+ADD_LATENCY = 1
+SUB_LATENCY = 1
+MULT_LATENCY = 3
+LSHIFT_LATENCY = 1
+RSHIFT_LATENCY = 1
+OUTPUT_LATENCY = 1
+NOP_LATENCY = 1
 
 # EDGE KIND
 DATA = 0
@@ -73,7 +78,8 @@ class OperationNode:
         self.line_num = None  # type- INT
         self.ir_list_node = None # type- Node in IR_List.py; reference to the node in the IR_List that corresponds to this operation node
         self.type = None    # opcode
-        self.delay = None     # latency of that opcode
+        self.latency = None     # latency/delay of that opcode
+        self.priority = 0
         self.into_edges = {}      # Edges going INTO this node; line num of parent mapped to edge between this node and parent
         self.outof_edges = {}       # Edges coming OUT OF this node; line num of child mapped to edge between this node and child
     
@@ -130,17 +136,20 @@ class OperationNode:
 
 
 class DependenceGraph:
-    def __init__(self):
+    def __init__(self, DEBUG_FLAG):
         """
             nodes: map line num (from renamed block) of node to operation node; contains type Node
             edges: map line num of node that the edge is coming OUT OF (parent) to the edge; contains type Edge
         """
+        self.DEBUG_FLAG = DEBUG_FLAG
         self.VR_TO_NODE = {}
         self.nodes_map = {} # line num to node
 
         # map line num of node that the edge is coming OUT OF (parent) to the edge; contains type Edge
         self.kinds = ["Data", "Serial", "Conflict"]
         self.opcodes_list = ["load", "store", "loadI", "add", "sub", "mult", "lshift", "rshift", "output", "nop"]
+        print ("DEPENDENCE GRAPH INIT- DEBUG FLAG: " + str(self.DEBUG_FLAG))
+
     
 
     def add_node(self, ir_list_node):
@@ -149,17 +158,44 @@ class DependenceGraph:
             Add node to nodes map that is keyed by node's line number
             node: node to add to the nodes map
         """
-        print("ADD NODE")
+        # print("ADD NODE")
         # Make node
         node = OperationNode()
         node.line_num = ir_list_node.line
         node.ir_list_node = ir_list_node
         node.type = ir_list_node.opcode
   
-        # TODO: delay
+        
+        if (node.type == LOAD_OP):
+            node.latency = LOAD_LATENCY
+        elif (node.type == LOADI_OP):
+            node.latency = LOADI_LATENCY
+        elif (node.type == STORE_OP):
+            node.latency = STORE_LATENCY
+        elif (node.type == ADD_OP):
+            node.latency = ADD_LATENCY
+        elif (node.type == ADD_OP):
+            node.latency = ADD_LATENCY
+        elif (node.type == SUB_OP):
+            node.latency = SUB_LATENCY
+        elif (node.type == MULT_OP):
+            node.latency = MULT_LATENCY
+        elif (node.type == LSHIFT_OP):
+            node.latency = LSHIFT_LATENCY
+        elif (node.type == RSHIFT_OP):
+            node.latency = RSHIFT_LATENCY
+        elif (node.type == OUTPUT_OP):
+            node.latency = OUTPUT_LATENCY
+        elif (node.type == NOP_OP): # shouldnt happen but added just in case
+            node.latency = NOP_LATENCY
+        
+
+        # TODO: priority, but i think that is not at intially adding the node,but this is a reminder that it is a field in Node
+            
+
 
         # Add to mapping
-        # TODO: only do this when it defines
+        # only do this when it defines
         vr = ir_list_node.arg3[1]
         if vr not in self.VR_TO_NODE and vr != None:   # first time
             self.VR_TO_NODE[vr] = node
@@ -171,7 +207,7 @@ class DependenceGraph:
         """
             Add a serial edge from parent_node to child_node
         """
-        print("ADD CONFLICR EDGE")
+        # print("ADD CONFLICR EDGE")
         edge = Edge()
         edge.kind = CONFLICT
         edge.latency = 0 # idk
@@ -189,7 +225,7 @@ class DependenceGraph:
         """
             Add a serial edge from parent_node to child_node
         """
-        print("ADD SERIAL EDGE")
+        # print("ADD SERIAL EDGE")
         edge = Edge()
         edge.kind = SERIAL
         edge.latency = 1 # "one cycle latency is enough"
@@ -212,17 +248,17 @@ class DependenceGraph:
             Add a data edge
             for each VRj used in o, add an edge from o to the node in M(VRj)
         """
-        print('ADD DATA EDGE')
-        print(node.ir_list_node.arg1)
-        print(node.ir_list_node.arg2)
-        print(node.ir_list_node.arg3)
+        # print('ADD DATA EDGE')
+        # print(node.ir_list_node.arg1)
+        # print(node.ir_list_node.arg2)
+        # print(node.ir_list_node.arg3)
         # add out of nodes- data
         # for each VRj used in o, add an edge from o to the node in M(VRj)
         # arg1
         if (node.ir_list_node.arg1[1] != None):
             into_node = self.VR_TO_NODE[node.ir_list_node.arg1[1]]
-            print('ARG1 INTO NODE: ')
-            self.print_node(into_node)
+            # print('ARG1 INTO NODE: ')
+            # self.print_node(into_node)
             # make the edge
             edge = Edge()
             edge.kind = DATA
@@ -242,8 +278,8 @@ class DependenceGraph:
         
         if (node.ir_list_node.arg2[1] != None):
             into_node = self.VR_TO_NODE[node.ir_list_node.arg2[1]]
-            print('ARG2 INTO NODE: ')
-            self.print_node(into_node)
+            # print('ARG2 INTO NODE: ')
+            # self.print_node(into_node)
             # make the edge
             edge = Edge()
             edge.kind = DATA
@@ -261,8 +297,8 @@ class DependenceGraph:
         
         if (node.ir_list_node.arg3[1] != None and node.ir_list_node.opcode == STORE_OP):
             into_node = self.VR_TO_NODE[node.ir_list_node.arg3[1]]
-            print('ARG3 INTO NODE: ')
-            self.print_node(into_node)
+            # print('ARG3 INTO NODE: ')
+            # self.print_node(into_node)
             # make the edge
             edge = Edge()
             edge.kind = DATA
@@ -326,7 +362,15 @@ class DependenceGraph:
             temp += ":  "
             poo = self.get_ir_node(node.ir_list_node)
             temp += poo
-            temp += ' "];'
+            # priority
+            temp += '\n'
+            temp += "prio:  "
+            temp += str(node.priority)
+            if (self.DEBUG_FLAG == True):
+                temp += '\n'
+                temp += "latency:  "
+                temp += str(node.latency)
+            temp += '"];'
             temp += '\n'
             ret += temp
         print(ret)
@@ -395,9 +439,9 @@ class DependenceGraph:
                     success_count += 1
                     # print(f"The key-value (parent node linenum, edge) pair ({key_to_check}: {value_to_check}) exists in into_edges.")
                 else:
-                    print(f"The key-value (parent node linenum, edge) pair ({key_to_check}: {value_to_check}) does not exist in into_edges.")
+                    print(f"// The key-value (parent node linenum, edge) pair ({key_to_check}: {value_to_check}) does not exist in into_edges.")
                     fail_count += 1
-        print(str(success_count) + " / " + str(total_count) + " into/outof edges correct")
+        print("// " + str(success_count) + " / " + str(total_count) + " into/outof edges correct")
 
                 
 
