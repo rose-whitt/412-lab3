@@ -1,0 +1,169 @@
+digraph DG {
+  17 [label="17:  loadI  2000 => r20
+prio:  853"];
+  18 [label="18:  load   r20 => r1
+prio:  842"];
+  19 [label="19:  loadI  4 => r10
+prio:  813"];
+  20 [label="20:  loadI  4 => r9
+prio:  813"];
+  21 [label="21:  loadI  4 => r7
+prio:  762"];
+  22 [label="22:  loadI  4 => r8
+prio:  762"];
+  23 [label="23:  add    r10, r9  => r19
+prio:  802"];
+  24 [label="24:  add    r7, r8  => r18
+prio:  751"];
+  25 [label="25:  add    r19, r18  => r17
+prio:  700"];
+  26 [label="26:  add    r18, r17  => r16
+prio:  649"];
+  27 [label="27:  add    r17, r16  => r15
+prio:  598"];
+  28 [label="28:  add    r16, r15  => r14
+prio:  547"];
+  29 [label="29:  add    r15, r14  => r13
+prio:  496"];
+  30 [label="30:  add    r14, r13  => r12
+prio:  445"];
+  31 [label="31:  add    r13, r12  => r11
+prio:  394"];
+  33 [label="33:  store  r1 => r19
+prio:  791"];
+  34 [label="34:  store  r1 => r18
+prio:  740"];
+  35 [label="35:  store  r1 => r17
+prio:  689"];
+  36 [label="36:  store  r1 => r16
+prio:  638"];
+  37 [label="37:  store  r1 => r15
+prio:  587"];
+  38 [label="38:  store  r1 => r14
+prio:  536"];
+  39 [label="39:  store  r1 => r13
+prio:  485"];
+  40 [label="40:  store  r1 => r12
+prio:  434"];
+  41 [label="41:  store  r1 => r11
+prio:  383"];
+  43 [label="43:  loadI  16 => r5
+prio:  343"];
+  44 [label="44:  loadI  24 => r4
+prio:  292"];
+  45 [label="45:  loadI  40 => r3
+prio:  241"];
+  47 [label="47:  add    r10, r9  => r2
+prio:  190"];
+  48 [label="48:  add    r9, r7  => r0
+prio:  139"];
+  49 [label="49:  add    r7, r8  => r6
+prio:  0"];
+  51 [label="51:  store  r1 => r5
+prio:  332"];
+  52 [label="52:  store  r1 => r4
+prio:  281"];
+  53 [label="53:  store  r1 => r3
+prio:  230"];
+  54 [label="54:  store  r1 => r2
+prio:  179"];
+  55 [label="55:  store  r1 => r0
+prio:  128"];
+  57 [label="57:  output 8
+prio:  77"];
+  58 [label="58:  output 16
+prio:  66"];
+  59 [label="59:  output 24
+prio:  55"];
+  60 [label="60:  output 40
+prio:  44"];
+  61 [label="61:  output 64
+prio:  33"];
+  62 [label="62:  output 104
+prio:  22"];
+  63 [label="63:  output 168
+prio:  11"];
+  64 [label="64:  output 272
+prio:  0"];
+  18 -> 17 [ label=" Data, vr20"];
+  23 -> 19 [ label=" Data, vr10"];
+  23 -> 20 [ label=" Data, vr9"];
+  24 -> 21 [ label=" Data, vr7"];
+  24 -> 22 [ label=" Data, vr8"];
+  25 -> 23 [ label=" Data, vr19"];
+  25 -> 24 [ label=" Data, vr18"];
+  26 -> 24 [ label=" Data, vr18"];
+  26 -> 25 [ label=" Data, vr17"];
+  27 -> 25 [ label=" Data, vr17"];
+  27 -> 26 [ label=" Data, vr16"];
+  28 -> 26 [ label=" Data, vr16"];
+  28 -> 27 [ label=" Data, vr15"];
+  29 -> 27 [ label=" Data, vr15"];
+  29 -> 28 [ label=" Data, vr14"];
+  30 -> 28 [ label=" Data, vr14"];
+  30 -> 29 [ label=" Data, vr13"];
+  31 -> 29 [ label=" Data, vr13"];
+  31 -> 30 [ label=" Data, vr12"];
+  33 -> 18 [ label=" Data, vr1"];
+  33 -> 23 [ label=" Data, vr19"];
+  34 -> 18 [ label=" Data, vr1"];
+  34 -> 24 [ label=" Data, vr18"];
+  34 -> 33[ label=" Serial "];
+  35 -> 18 [ label=" Data, vr1"];
+  35 -> 25 [ label=" Data, vr17"];
+  35 -> 34[ label=" Serial "];
+  36 -> 18 [ label=" Data, vr1"];
+  36 -> 26 [ label=" Data, vr16"];
+  36 -> 35[ label=" Serial "];
+  37 -> 18 [ label=" Data, vr1"];
+  37 -> 27 [ label=" Data, vr15"];
+  37 -> 36[ label=" Serial "];
+  38 -> 18 [ label=" Data, vr1"];
+  38 -> 28 [ label=" Data, vr14"];
+  38 -> 37[ label=" Serial "];
+  39 -> 18 [ label=" Data, vr1"];
+  39 -> 29 [ label=" Data, vr13"];
+  39 -> 38[ label=" Serial "];
+  40 -> 18 [ label=" Data, vr1"];
+  40 -> 30 [ label=" Data, vr12"];
+  40 -> 39[ label=" Serial "];
+  41 -> 18 [ label=" Data, vr1"];
+  41 -> 31 [ label=" Data, vr11"];
+  41 -> 40[ label=" Serial "];
+  47 -> 19 [ label=" Data, vr10"];
+  47 -> 20 [ label=" Data, vr9"];
+  48 -> 20 [ label=" Data, vr9"];
+  48 -> 21 [ label=" Data, vr7"];
+  49 -> 21 [ label=" Data, vr7"];
+  49 -> 22 [ label=" Data, vr8"];
+  51 -> 18 [ label=" Data, vr1"];
+  51 -> 43 [ label=" Data, vr5"];
+  51 -> 41[ label=" Serial "];
+  52 -> 18 [ label=" Data, vr1"];
+  52 -> 44 [ label=" Data, vr4"];
+  52 -> 51[ label=" Serial "];
+  53 -> 18 [ label=" Data, vr1"];
+  53 -> 45 [ label=" Data, vr3"];
+  53 -> 52[ label=" Serial "];
+  54 -> 18 [ label=" Data, vr1"];
+  54 -> 47 [ label=" Data, vr2"];
+  54 -> 53[ label=" Serial "];
+  55 -> 18 [ label=" Data, vr1"];
+  55 -> 48 [ label=" Data, vr0"];
+  55 -> 54[ label=" Serial "];
+  57 -> 55 [ label=" Conflict "];
+  58 -> 57[ label=" Serial "];
+  58 -> 55 [ label=" Conflict "];
+  59 -> 58[ label=" Serial "];
+  59 -> 55 [ label=" Conflict "];
+  60 -> 59[ label=" Serial "];
+  60 -> 55 [ label=" Conflict "];
+  61 -> 60[ label=" Serial "];
+  61 -> 55 [ label=" Conflict "];
+  62 -> 61[ label=" Serial "];
+  62 -> 55 [ label=" Conflict "];
+  63 -> 62[ label=" Serial "];
+  63 -> 55 [ label=" Conflict "];
+  64 -> 63[ label=" Serial "];
+  64 -> 55 [ label=" Conflict "];
+}

@@ -44,6 +44,8 @@ class Lab3:
         self.DEBUG_FLAG = DEBUG_FLAG
         self.DP_MAP = DependenceGraph(DEBUG_FLAG)
         self.kinds = ["Data", "Serial", "Conflict"]
+        self.roots = []
+        self.leaves = []
 
     def build_graph(self):
         # print("WASSUP BITCH")
@@ -99,11 +101,58 @@ class Lab3:
 
             start = start.next
 
-        
+        cunt = self.DP_MAP.identify_roots_and_leaves()
+        self.roots = cunt[0]
+        self.leaves = cunt[1]
         self.DP_MAP.print_dot()
         if (self.DEBUG_FLAG == True):
             self.DP_MAP.print_vrtonode()
         self.DP_MAP.graph_consistency_checker()
+        print("// num roots: " + str(len(self.roots)))
+        print("// num leaves: " + str(len(self.leaves)))
+
+
+
+    def find_root(self):
+        """
+            Given a node, traverse the graph until arrive at a root
+            for testing:
+                report05.i has two roots
+                report11.i has two roots
+                report13.i has two roots
+                report18.i has four roots
+        """
+        finished_nodes = [] # nodes that have had all the paths calculated
+    
+    def get_highest_edge(self, edge_map):
+        """
+            Given an edge map, return the edge with the highest latency
+        """
+        max = 0
+        max_edge = None
+        for key, edge in edge_map.items():
+            if (edge.latency > max):
+                max = edge.latency
+                max_edge = edge
+        return max_edge
+
+    def leaf_to_root(self, node):
+        """
+            traverse leaf to root to find highest latency path
+        """
+        
+
+
+
+
+        
+
+
+
+
+
+        
+    
     
     def check_for_edge(self, parent_node, child_node):
         """

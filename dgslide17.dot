@@ -1,0 +1,24 @@
+digraph DG {
+  1 [label="1:  loadI  8 => r3
+prio:  124"];
+  2 [label="2:  loadI  12 => r4
+prio:  124"];
+  3 [label="3:  add    r3, r4  => r0
+prio:  113"];
+  4 [label="4:  load   r0 => r1
+prio:  102"];
+  5 [label="5:  load   r3 => r2
+prio:  102"];
+  6 [label="6:  store  r1 => r0
+prio:  51"];
+  7 [label="7:  output 12
+prio:  0"];
+  3 -> 1 [ label=" Data, vr3"];
+  3 -> 2 [ label=" Data, vr4"];
+  4 -> 3 [ label=" Data, vr0"];
+  5 -> 1 [ label=" Data, vr3"];
+  6 -> 4 [ label=" Data, vr1"];
+  6 -> 3 [ label=" Data, vr0"];
+  6 -> 5[ label=" Serial "];
+  7 -> 6 [ label=" Conflict "];
+}

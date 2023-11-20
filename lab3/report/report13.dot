@@ -1,0 +1,58 @@
+digraph DG {
+  12 [label="12:  loadI  2016 => r2
+prio:  299"];
+  14 [label="14:  loadI  8 => r6
+prio:  208"];
+  16 [label="16:  loadI  2000 => r9
+prio:  0"];
+  18 [label="18:  loadI  2004 => r0
+prio:  248"];
+  20 [label="20:  load   r2 => r8
+prio:  288"];
+  22 [label="22:  sub    r0, r8  => r4
+prio:  237"];
+  24 [label="24:  sub    r2, r6  => r7
+prio:  197"];
+  26 [label="26:  sub    r7, r6  => r5
+prio:  186"];
+  28 [label="28:  store  r2 => r4
+prio:  226"];
+  30 [label="30:  store  r6 => r5
+prio:  175"];
+  32 [label="32:  load   r4 => r3
+prio:  124"];
+  34 [label="34:  add    r2, r3  => r1
+prio:  73"];
+  36 [label="36:  store  r1 => r0
+prio:  62"];
+  38 [label="38:  output 2000
+prio:  11"];
+  40 [label="40:  output 2004
+prio:  0"];
+  20 -> 12 [ label=" Data, vr2"];
+  22 -> 18 [ label=" Data, vr0"];
+  22 -> 20 [ label=" Data, vr8"];
+  24 -> 12 [ label=" Data, vr2"];
+  24 -> 14 [ label=" Data, vr6"];
+  26 -> 24 [ label=" Data, vr7"];
+  26 -> 14 [ label=" Data, vr6"];
+  28 -> 12 [ label=" Data, vr2"];
+  28 -> 22 [ label=" Data, vr4"];
+  28 -> 20[ label=" Serial "];
+  30 -> 14 [ label=" Data, vr6"];
+  30 -> 26 [ label=" Data, vr5"];
+  30 -> 28[ label=" Serial "];
+  30 -> 20[ label=" Serial "];
+  32 -> 22 [ label=" Data, vr4"];
+  32 -> 30 [ label=" Conflict "];
+  34 -> 12 [ label=" Data, vr2"];
+  34 -> 32 [ label=" Data, vr3"];
+  36 -> 34 [ label=" Data, vr1"];
+  36 -> 18 [ label=" Data, vr0"];
+  36 -> 30[ label=" Serial "];
+  36 -> 20[ label=" Serial "];
+  36 -> 32[ label=" Serial "];
+  38 -> 36 [ label=" Conflict "];
+  40 -> 38[ label=" Serial "];
+  40 -> 36 [ label=" Conflict "];
+}

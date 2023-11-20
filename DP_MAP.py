@@ -79,7 +79,10 @@ class OperationNode:
         self.ir_list_node = None # type- Node in IR_List.py; reference to the node in the IR_List that corresponds to this operation node
         self.type = None    # opcode
         self.delay = None     # latency of that opcode
+        self.latency_weighted_len = []  # array in case there are multiple roots
         self.max_latency_weighted_length = 0    # longest path from this node to root
+        self.root = False   # true if this node is a root (len(into_edges) == 0), false otherwise
+        self.leaf = False   # true if this node is a leaf (len(outof_edges) == 0), false otherwise
         self.priority = 0
         self.into_edges = {}      # Edges going INTO this node; line num of parent mapped to edge between this node and parent
         self.outof_edges = {}       # Edges coming OUT OF this node; line num of child mapped to edge between this node and child
@@ -339,6 +342,34 @@ class DependenceGraph:
 
         temp = opcode + lh + " " + rh
         return temp
+
+
+    def identify_roots_and_leaves(self):
+        """
+            To be done after all nodes and edges are added but before priorities computed
+            For each node, determines if it is 
+                a root (set node.root = true)
+                a leaf (set node.leaf = true)
+                or neither (do nothing)
+            
+            Returns mapping. key = 0, value = roots; key = 1, value = leaves
+        """
+        print("[identify_roots_and_leaves]")
+        roots = []
+        leaves = []
+        for line_num, node in self.nodes_map.items():
+            if (len(node.into_edges) == 0):
+                node.root = True
+                roots.append(node)
+            if (len(node.outof_edges) == 0):
+                node.leaf = True
+                leaves.append(leaves)
+        roots_and_leaves = {0: roots, 1: leaves}
+        return roots_and_leaves
+
+
+
+
     
     def print_dot(self):
         """
@@ -372,6 +403,13 @@ class DependenceGraph:
                 temp += '\n'
                 temp += "delay:  "
                 temp += str(node.delay)
+
+                if (node.root):
+                    temp += '\n'
+                    temp += "root"
+                if (node.leaf):
+                    temp += '\n'
+                    temp += "leaf"
             temp += '"];'
             temp += '\n'
             ret += temp
@@ -429,7 +467,7 @@ class DependenceGraph:
         success_count = 0
         fail_count = 0
         for line_num, node in self.nodes_map.items():
-            # print(node)
+            print(node)
             # for each out edge (ex: edge ran to node b)
             for child_linenum, edge in node.outof_edges.items():
                 total_count += 1
