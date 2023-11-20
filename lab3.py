@@ -109,24 +109,10 @@ class Lab3:
         cunt = self.DP_MAP.identify_roots_and_leaves()
         self.roots = cunt[0]
         self.leaves = cunt[1]
-        # find line num of first 
-        # self.first_op_line_num = 
         
-        for root in self.roots:
-            self.find_all_paths(root)
-        
-        for path in self.all_paths:
-            print(self.print_node_list_lines(path))
-        
-        for node in self.DP_MAP.nodes_map.values():
-            self.get_all_parents(node)
-        
-        # self.get_paths_to_node(self.DP_MAP.nodes_map[8])
 
-        self.assign_paths_to_nodes()
-
-        print(self.DP_MAP.edge_list)
-        print(len(self.DP_MAP.edge_list))
+        # print(self.DP_MAP.edge_list)
+        # print(len(self.DP_MAP.edge_list))
 
         self.convert_edge_map()
         self.print_edge_map()
@@ -135,7 +121,7 @@ class Lab3:
             self.set_priorities(root)
         
         self.DP_MAP.print_dot()
-        
+
 
         # for root in self.roots:
         #     print("[Calling DFS for root at line " + str(root.line_num) + "]")
@@ -154,24 +140,7 @@ class Lab3:
 
    
 
-    def find_all_paths(self, start, path=[]):
-        """
-            Find all paths from root
-        """
-        path = path + [start]
-        paths = [path]
-        if len(start.outof_edges) == 0:  # No neighbors (leaf)
-            # print(self.print_node_list_lines(path))
-            self.all_paths.append(path)
-        outof_nodes = []
-        for child_line, e in start.outof_edges.items():
-            outof_nodes.append(self.DP_MAP.nodes_map[child_line])
-        for node in outof_nodes:
-            newpaths = self.find_all_paths(node, path)
-            for newpath in newpaths:
-                paths.append(newpath)
-        # print("len of paths: " + str(len(paths)))
-        return paths
+    
         
     def get_all_parents(self, node):
         all_parents = []
@@ -268,7 +237,6 @@ class Lab3:
             # push neighbors onto stack in reverse order to match th eorder of recursive function
             for neighbor, edge_latency in reversed(self.node_edge_map.get(current, [])):
                 stack.append((neighbor, current_priority + edge_latency))
-
 
 
 
