@@ -78,7 +78,8 @@ class OperationNode:
         self.line_num = None  # type- INT
         self.ir_list_node = None # type- Node in IR_List.py; reference to the node in the IR_List that corresponds to this operation node
         self.type = None    # opcode
-        self.latency = None     # latency/delay of that opcode
+        self.delay = None     # latency of that opcode
+        self.max_latency_weighted_length = 0    # longest path from this node to root
         self.priority = 0
         self.into_edges = {}      # Edges going INTO this node; line num of parent mapped to edge between this node and parent
         self.outof_edges = {}       # Edges coming OUT OF this node; line num of child mapped to edge between this node and child
@@ -167,27 +168,27 @@ class DependenceGraph:
   
         
         if (node.type == LOAD_OP):
-            node.latency = LOAD_LATENCY
+            node.delay = LOAD_LATENCY
         elif (node.type == LOADI_OP):
-            node.latency = LOADI_LATENCY
+            node.delay = LOADI_LATENCY
         elif (node.type == STORE_OP):
-            node.latency = STORE_LATENCY
+            node.delay = STORE_LATENCY
         elif (node.type == ADD_OP):
-            node.latency = ADD_LATENCY
+            node.delay = ADD_LATENCY
         elif (node.type == ADD_OP):
-            node.latency = ADD_LATENCY
+            node.delay = ADD_LATENCY
         elif (node.type == SUB_OP):
-            node.latency = SUB_LATENCY
+            node.delay = SUB_LATENCY
         elif (node.type == MULT_OP):
-            node.latency = MULT_LATENCY
+            node.delay = MULT_LATENCY
         elif (node.type == LSHIFT_OP):
-            node.latency = LSHIFT_LATENCY
+            node.delay = LSHIFT_LATENCY
         elif (node.type == RSHIFT_OP):
-            node.latency = RSHIFT_LATENCY
+            node.delay = RSHIFT_LATENCY
         elif (node.type == OUTPUT_OP):
-            node.latency = OUTPUT_LATENCY
+            node.delay = OUTPUT_LATENCY
         elif (node.type == NOP_OP): # shouldnt happen but added just in case
-            node.latency = NOP_LATENCY
+            node.delay = NOP_LATENCY
         
 
         # TODO: priority, but i think that is not at intially adding the node,but this is a reminder that it is a field in Node
@@ -206,11 +207,13 @@ class DependenceGraph:
     def add_conflict_edge(self, parent_node, child_node):
         """
             Add a serial edge from parent_node to child_node
+            parent_node: second op
+            child_node: first op
         """
         # print("ADD CONFLICR EDGE")
         edge = Edge()
         edge.kind = CONFLICT
-        edge.latency = 0 # idk
+        edge.latency = child_node.delay # latency equal to the latency of the first operation
         edge.parent = parent_node
         edge.outof_line_num = parent_node.line_num
         edge.child = child_node

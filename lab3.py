@@ -68,10 +68,12 @@ class Lab3:
             LOAD_RAW = False    # parent = load, child = store, conflict
             OUTPUT_RAW = False  # parent = output, child = store, conflict
 
-            if (start.opcode == LOAD_OP or start.opcode == STORE_OP or start.opcode == OUTPUT_OP):
-                tmp_node_list = list(self.DP_MAP.nodes_map.values())
-                # reverse so it starts from most recent node to farthest away node
-                for other_node in reversed(tmp_node_list):
+            tmp_node_list = list(self.DP_MAP.nodes_map.values())
+            # TODO: load to load, no edge needed
+            # reverse so it starts from most recent node to farthest away node
+            for other_node in reversed(tmp_node_list):
+                if (start.opcode == LOAD_OP or start.opcode == STORE_OP or start.opcode == OUTPUT_OP):
+
                     # either output to output (serial) or output to store (conflict)
                     if (tmp_node.type == OUTPUT_OP):
                         if (other_node.type == OUTPUT_OP and other_node != tmp_node and OUTPUT_OUTPUT == False):   # TODO: maybe OUTPUT_WAR variable so its the most recent output?
@@ -150,7 +152,7 @@ def main():
         print("                     Scan, parse, rename, and allocate code in the input block given in filename so that it uses")
         print("                     only registers r0 to rk-1 and prints the resulting code in the stdout.")
         print("     [filename]          Runs lab3, i.e. used to invoke schedule shit.")
-        print("     -x [filename]          Debugging for lab3. Runs lab3 like normal but prints extra info for debugging like latency in nodes in graph/dot file, VR_TO_NODE map, and any other things I decide.")
+        print("     -x [filename]          Debugging for lab3. Runs lab3 like normal but prints extra info for debugging like latency-weighted distance in nodes in graph/dot file, latency of edge in graph/dot file, VR_TO_NODE map, and any other things I decide.")
 
     else:
 
