@@ -115,10 +115,17 @@ class Lab3:
         #     print(n.line_num)
         # print("]")
         self.print_into_outof(self.DP_MAP.nodes_map[1])
+        # for root in self.roots:
+        #     for line_num, node in self.DP_MAP.nodes_map.items():
+        #         num_paths = self.countPaths(root, node)
+        #         print(str(root.line_num) + " -> " + str(node.line_num) + " num paths: " + str(num_paths))
         for root in self.roots:
-            for line_num, node in self.DP_MAP.nodes_map.items():
-                num_paths = self.countPaths(root, node)
-                print(str(root.line_num) + " -> " + str(node.line_num) + " num paths: " + str(num_paths))
+            p = self.find_all_paths(root)
+            for path in p:
+                print(self.print_node_list_lines(path))
+            # tmp = self.print_node_list_lines(p)
+            # print(p)
+
         # for root in self.roots:
         #     print("[Calling DFS for root at line " + str(root.line_num) + "]")
         #     self.DFS_one_path(root)
@@ -128,7 +135,11 @@ class Lab3:
         print("// num roots: " + str(len(self.roots)))
         print("// num leaves: " + str(len(self.leaves)))
 
-
+    def print_node_list_lines(self, node_list):
+        tmp = []
+        for node in node_list:
+            tmp.append(node.line_num)
+        return tmp
 
     def find_root(self):
         """
@@ -339,6 +350,7 @@ class Lab3:
         # function to print all paths
         pathCount = [0]
         self.countPathsUtil(s, d, visited, pathCount)
+        print(pathCount)
         return pathCount[0]
  
     # A recursive function to print all paths
@@ -366,11 +378,29 @@ class Lab3:
             while i < len(adj_nodes):
 
                 if (not visited[adj_nodes[i].line_num]):
+                    print(u.line_num)
                     self.countPathsUtil(adj_nodes[i], d, visited, pathCount)
                 i += 1
  
         visited[u.line_num] = False
 
+    def find_all_paths(self, start, path=[]):
+        """
+            Find all paths from root
+        """
+        path = path + [start]
+        paths = [path]
+        if len(start.outof_edges) == 0:  # No neighbors
+            print(path)
+        outof_nodes = []
+        for child_line, e in start.outof_edges.items():
+            outof_nodes.append(self.DP_MAP.nodes_map[child_line])
+        for node in outof_nodes:
+            newpaths = self.find_all_paths(node, path)
+            for newpath in newpaths:
+                paths.append(newpath)
+        print("len of paths: " + str(len(paths)))
+        return paths
         
         
 
