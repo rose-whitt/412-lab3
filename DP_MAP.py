@@ -148,6 +148,7 @@ class DependenceGraph:
         self.DEBUG_FLAG = DEBUG_FLAG
         self.VR_TO_NODE = {}
         self.nodes_map = {} # line num to node
+        self.edge_list = []
 
         # map line num of node that the edge is coming OUT OF (parent) to the edge; contains type Edge
         self.kinds = ["Data", "Serial", "Conflict"]
@@ -225,6 +226,7 @@ class DependenceGraph:
         parent_node.outof_edges[child_node.line_num] = edge
         # add edge to child's into map
         child_node.into_edges[parent_node.line_num] = edge
+        self.edge_list.append(edge)
 
     def add_serial_edge(self, parent_node, child_node):
         """
@@ -243,6 +245,8 @@ class DependenceGraph:
         parent_node.outof_edges[child_node.line_num] = edge
         # add edge to child's into map
         child_node.into_edges[parent_node.line_num] = edge
+        self.edge_list.append(edge)
+
 
 
 
@@ -278,6 +282,8 @@ class DependenceGraph:
             node.outof_edges[into_node.line_num] = edge
             # add edge to child's into map
             into_node.into_edges[node.line_num] = edge
+            self.edge_list.append(edge)
+
 
         # arg2
         
@@ -299,6 +305,8 @@ class DependenceGraph:
             node.outof_edges[into_node.line_num] = edge
             # add edge to child's into map
             into_node.into_edges[node.line_num] = edge
+            self.edge_list.append(edge)
+
         
         if (node.ir_list_node.arg3[1] != None and node.ir_list_node.opcode == STORE_OP):
             into_node = self.VR_TO_NODE[node.ir_list_node.arg3[1]]
@@ -318,6 +326,8 @@ class DependenceGraph:
             node.outof_edges[into_node.line_num] = edge
             # add edge to child's into map
             into_node.into_edges[node.line_num] = edge
+            self.edge_list.append(edge)
+
     
     def get_ir_node(self, node):
         """
