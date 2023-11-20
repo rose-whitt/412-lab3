@@ -44,7 +44,6 @@ class Lab3:
         self.DEBUG_FLAG = DEBUG_FLAG
         self.DP_MAP = DependenceGraph(DEBUG_FLAG)
         self.kinds = ["Data", "Serial", "Conflict"]
-        print ("LAB3 INIT- DEBUG FLAG: " + str(self.DEBUG_FLAG))
 
     def build_graph(self):
         # print("WASSUP BITCH")
@@ -69,10 +68,13 @@ class Lab3:
             OUTPUT_RAW = False  # parent = output, child = store, conflict
 
             tmp_node_list = list(self.DP_MAP.nodes_map.values())
-            # TODO: load to load, no edge needed
             # reverse so it starts from most recent node to farthest away node
             for other_node in reversed(tmp_node_list):
+                
+
+                # serial and conflict edges
                 if (start.opcode == LOAD_OP or start.opcode == STORE_OP or start.opcode == OUTPUT_OP):
+                    # TODO: load to load, no edge needed
 
                     # either output to output (serial) or output to store (conflict)
                     if (tmp_node.type == OUTPUT_OP):
@@ -99,7 +101,8 @@ class Lab3:
 
         
         self.DP_MAP.print_dot()
-        self.DP_MAP.print_vrtonode()
+        if (self.DEBUG_FLAG == True):
+            self.DP_MAP.print_vrtonode()
         self.DP_MAP.graph_consistency_checker()
     
     def check_for_edge(self, parent_node, child_node):

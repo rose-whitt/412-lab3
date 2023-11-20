@@ -149,7 +149,6 @@ class DependenceGraph:
         # map line num of node that the edge is coming OUT OF (parent) to the edge; contains type Edge
         self.kinds = ["Data", "Serial", "Conflict"]
         self.opcodes_list = ["load", "store", "loadI", "add", "sub", "mult", "lshift", "rshift", "output", "nop"]
-        print ("DEPENDENCE GRAPH INIT- DEBUG FLAG: " + str(self.DEBUG_FLAG))
 
     
 
@@ -265,7 +264,7 @@ class DependenceGraph:
             # make the edge
             edge = Edge()
             edge.kind = DATA
-            edge.latency = 0    # idk
+            edge.latency = into_node.delay    # latency of the edge is the delay of the first operation (into_node)
             edge.vr = node.ir_list_node.arg1[1]
             edge.parent = node
             edge.outof_line_num = node.line_num
@@ -286,7 +285,7 @@ class DependenceGraph:
             # make the edge
             edge = Edge()
             edge.kind = DATA
-            edge.latency = 0    # idk
+            edge.latency = into_node.delay    # latency of the edge is the delay of the first operation (into_node)
             edge.vr = node.ir_list_node.arg2[1]
             edge.parent = node
             edge.outof_line_num = node.line_num
@@ -305,7 +304,7 @@ class DependenceGraph:
             # make the edge
             edge = Edge()
             edge.kind = DATA
-            edge.latency = 0    # idk
+            edge.latency = into_node.delay    # latency of the edge is the delay of the first operation (into_node)
             edge.vr = node.ir_list_node.arg3[1]
             edge.parent = node
             edge.outof_line_num = node.line_num
@@ -371,8 +370,8 @@ class DependenceGraph:
             temp += str(node.priority)
             if (self.DEBUG_FLAG == True):
                 temp += '\n'
-                temp += "latency:  "
-                temp += str(node.latency)
+                temp += "delay:  "
+                temp += str(node.delay)
             temp += '"];'
             temp += '\n'
             ret += temp
@@ -406,12 +405,15 @@ class DependenceGraph:
             temp += ' [ label=" '
             if (edge.kind != DATA):
                 temp += self.kinds[edge.kind]
-                temp += ' "];'
             elif (edge.kind == DATA):
                 temp += self.kinds[edge.kind]
                 temp += ', vr'
                 temp += str(edge.vr)
-                temp += '"];'
+            
+            if (self.DEBUG_FLAG == True):
+                temp += " ; Latency = "
+                temp += str(edge.latency)
+            temp += '"];'
             temp += '\n'
             ret += temp
         print(ret)
