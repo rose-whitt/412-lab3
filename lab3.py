@@ -104,7 +104,12 @@ class Lab3:
         cunt = self.DP_MAP.identify_roots_and_leaves()
         self.roots = cunt[0]
         self.leaves = cunt[1]
+        # find line num of first 
+        # self.first_op_line_num = 
         self.DP_MAP.print_dot()
+        for root in self.roots:
+            print("[Calling DFS for root at line " + str(root.line_num) + "]")
+            self.DFS_one_path(root)
         if (self.DEBUG_FLAG == True):
             self.DP_MAP.print_vrtonode()
         self.DP_MAP.graph_consistency_checker()
@@ -140,6 +145,56 @@ class Lab3:
         """
             traverse leaf to root to find highest latency path
         """
+    
+    # 
+    def DFS_one_path(self, node):
+        """
+            prints all not yet visited vertices reachable from node (root)
+
+            prints all vertices in DFS manner from a given source.
+        
+        """
+        # Initially mark all node as not visited, key is their line num since it doesnt always start on first line
+        visited = {}
+        # Create a list to store paths
+        paths = {}
+        for line_num, node in self.DP_MAP.nodes_map.items():
+            visited[line_num] = False
+            paths[line_num] = []
+ 
+        # Create a stack for DFS 
+        stack = []
+
+ 
+        # Push the current source node. 
+        stack.append(node) 
+ 
+        while (len(stack)): 
+            # Pop a vertex from stack and print it 
+            node = stack[-1] 
+            stack.pop()
+ 
+            # Stack may contain same vertex twice. So 
+            # we need to print the popped item only 
+            # if it is not visited. 
+            if (not visited[node.line_num]):     # visited is indexed by node line num
+                print(node.line_num, end=' ')
+                tmp_joined_path = ' -> '.join(map(str, paths[node.line_num]))
+                print("Path to " + str(node.line_num) + " : " + tmp_joined_path)
+                visited[node.line_num] = True
+            
+ 
+            # Get all adjacent vertices of the popped vertex s 
+            # If a adjacent has not been visited, then push it 
+            # to the stack. 
+            # for node in self.adj[node]: 
+            # going root to leaf so want to get child associated with each outof_edge
+            for child_line_num, edge in node.outof_edges.items():
+                child = edge.child
+                if (not visited[child_line_num]): 
+                    stack.append(child) 
+                    paths[child.line_num] = paths[edge.parent.line_num] + [child.line_num]
+        print('\n')
         
 
 

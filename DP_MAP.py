@@ -467,7 +467,7 @@ class DependenceGraph:
         success_count = 0
         fail_count = 0
         for line_num, node in self.nodes_map.items():
-            print(node)
+            # print(node)
             # for each out edge (ex: edge ran to node b)
             for child_linenum, edge in node.outof_edges.items():
                 total_count += 1
