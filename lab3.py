@@ -107,9 +107,21 @@ class Lab3:
         # find line num of first 
         # self.first_op_line_num = 
         self.DP_MAP.print_dot()
+        # self.printAllPaths(self.roots[0], self.DP_MAP.nodes_map[3])
+        # self.get_parents_and_children(self.DP_MAP.nodes_map[1])
+        # parent_nodes = self.find_parents_iteratively(self.DP_MAP.nodes_map[1])
+        # print("PARENT NODES: [")
+        # for n in parent_nodes:
+        #     print(n.line_num)
+        # print("]")
+        self.print_into_outof(self.DP_MAP.nodes_map[1])
         for root in self.roots:
-            print("[Calling DFS for root at line " + str(root.line_num) + "]")
-            self.DFS_one_path(root)
+            for line_num, node in self.DP_MAP.nodes_map.items():
+                num_paths = self.countPaths(root, node)
+                print(str(root.line_num) + " -> " + str(node.line_num) + " num paths: " + str(num_paths))
+        # for root in self.roots:
+        #     print("[Calling DFS for root at line " + str(root.line_num) + "]")
+        #     self.DFS_one_path(root)
         if (self.DEBUG_FLAG == True):
             self.DP_MAP.print_vrtonode()
         self.DP_MAP.graph_consistency_checker()
@@ -198,8 +210,174 @@ class Lab3:
         
 
 
+    def printAllPathsUtil(self, start, end, visited, path):
+        # Mark all nodes as unvisited
+        
+
+        # Create a queue to store nodes to be explored
+        queue = [start]
+
+        # Mark the starting node as visited
+        # visited[start.line_num] = True
+        visited.remove(start)
+
+        while queue:
+            # Remove the first node from the queue
+            print("QUEUE: [")
+            for n in queue:
+                print(str(n.line_num))
+            print("]")
+
+            print("VISITED: [")
+            for n in visited:
+                print(str(n.line_num))
+            print("]")
+
+            # print(queue)
+            current_node = queue.pop(0)
+
+            # Check if the current node is the target node
+            if current_node == end:
+                # Print the current path
+                path = []
+                i = visited.index(current_node)
+                while (current_node != start and i < len(visited) and i >= 0):
+                    path.append(current_node)
+                    current_node = visited[i]
+                    i += 1
+                path.reverse()
+                # print(path)
+                for node in path:
+                    print(node)
+                continue
+
+            # Explore all unvisited neighbors of the current node
+            for child_line_num, edge in current_node.outof_edges.items():
+                child = edge.child
+                if child in visited:
+                    # Mark the neighbor as visited and add it to the queue
+                    visited.remove(child)
+                    queue.append(child)
+
+     # Prints all paths from 's' to 'd'
+    def printAllPaths(self, s, d):
+ 
+        # Mark all the vertices as not visited, when visited remove from visited
+        visited = []
+        for line_num, node in self.DP_MAP.nodes_map.items():
+            visited.append(node)
+ 
+        # Create an array to store paths
+        path = []
+ 
+        # Call the recursive helper function to print all paths
+        self.printAllPathsUtil(s, d, visited, path)
+
+    
+    
+    
+
+    def get_parents_and_children(self, node):
+        # get nodes in out of edges (children)
+        child_nodes = []
+        for child_line, e in node.outof_edges.items():
+            # get child node from nodes list
+            child_nodes.append(self.DP_MAP.nodes_map[child_line])
+
+        
+        # get nodes in into of edges (parents)
+        parent_nodes = []
+        for parent_line, e in node.into_edges.items():
+            # get child node from nodes list
+            cur_parent = self.DP_MAP.nodes_map[parent_line]
+            parent_nodes.append(cur_parent)
+            # cur_into_edges = cur_parent.into_edges
+            # while (len(cur_into_edges) > 0):    # until root
+            #     for p, e in cur_into_edges:
+        
+        print("CHILD NODES: [")
+        for n in child_nodes:
+            print(n.line_num)
+        print("]")
+        print("PARENT NODES: [")
+        for n in parent_nodes:
+            print(n.line_num)
+        print("]")
+        
+    def print_into_outof(self, node):
+        into = "parents = ["
+        for parent_linenum, e in node.into_edges.items():
+            into += " "
+            into += str(parent_linenum)
+            into += " "
+        into += "]"
+
+        outof = "children = ["
+        for child_linenum, e in node.outof_edges.items():
+            outof += " "
+            outof += str(child_linenum)
+            outof += " "
+        outof += "]"
+
+        print("------------node " + str(node.line_num) + "------------")
+        print(into)
+        print(outof)
+
+        print("------------------------")
+
+    
+    # Returns count of paths from 's' to 'd'
+    def countPaths(self, s, d):
+ 
+        # Mark all the vertices
+        # as not visited
+        visited = {}
+        for line_num, node in self.DP_MAP.nodes_map.items():
+            visited[line_num] = False
+ 
+        # Call the recursive helper
+        # function to print all paths
+        pathCount = [0]
+        self.countPathsUtil(s, d, visited, pathCount)
+        return pathCount[0]
+ 
+    # A recursive function to print all paths
+    # from 'u' to 'd'. visited[] keeps track
+    # of vertices in current path. path[]
+    # stores actual vertices and path_index
+    # is current index in path[]
+    def countPathsUtil(self, u, d, visited, pathCount):
+        visited[u.line_num] = True
+ 
+        # If current vertex is same as
+        # destination, then increment count
+        if (u == d):
+            pathCount[0] += 1
+ 
+        # If current vertex is not destination
+        else:
+ 
+            # Recur for all the vertices
+            # adjacent to current vertex
+            i = 0
+            adj_nodes = []
+            for child_line, e in u.outof_edges.items():
+                adj_nodes.append(self.DP_MAP.nodes_map[child_line])
+            while i < len(adj_nodes):
+
+                if (not visited[adj_nodes[i].line_num]):
+                    self.countPathsUtil(adj_nodes[i], d, visited, pathCount)
+                i += 1
+ 
+        visited[u.line_num] = False
+
+        
+        
 
 
+
+
+        
         
 
 
