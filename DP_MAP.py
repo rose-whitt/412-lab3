@@ -373,7 +373,7 @@ class DependenceGraph:
             
             Returns mapping. key = 0, value = roots; key = 1, value = leaves
         """
-        print("[identify_roots_and_leaves]")
+        if (self.DEBUG_FLAG == True): print("[identify_roots_and_leaves]")
         roots = []
         leaves = []
         for line_num, node in self.nodes_map.items():
@@ -503,7 +503,7 @@ class DependenceGraph:
                 else:
                     print(f"// The key-value (parent node linenum, edge) pair ({key_to_check}: {value_to_check}) does not exist in into_edges.")
                     fail_count += 1
-        print("// " + str(success_count) + " / " + str(total_count) + " into/outof edges correct")
+        if (self.DEBUG_FLAG == True): print("// " + str(success_count) + " / " + str(total_count) + " into/outof edges correct")
 
                 
 

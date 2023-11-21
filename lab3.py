@@ -145,19 +145,19 @@ class Lab3:
         # print(len(self.DP_MAP.edge_list))
 
         self.convert_edge_map()
-        self.print_edge_map()
+        if (self.DEBUG_FLAG == True): self.print_edge_map()
 
         for root in self.roots:
             self.set_priorities(root)
         
-        self.DP_MAP.print_dot()
+        if (self.DEBUG_FLAG == True): self.DP_MAP.print_dot()
 
 
         if (self.DEBUG_FLAG == True):
             self.DP_MAP.print_vrtonode()
         self.DP_MAP.graph_consistency_checker()
-        print("// num roots: " + str(len(self.roots)))
-        print("// num leaves: " + str(len(self.leaves)))
+        if (self.DEBUG_FLAG == True): print("// num roots: " + str(len(self.roots)))
+        if (self.DEBUG_FLAG == True): print("// num leaves: " + str(len(self.leaves)))
 
     def print_node_list_lines(self, node_list):
         tmp = []
@@ -406,14 +406,14 @@ class Lab3:
         # if (self.DEBUG_FLAG == True): self.print_ready(ready)
 
         if (self.DEBUG_FLAG == True): print("BEGINNING WHILE LOOP")
-        print(len(ready))
-        print(len(active))
+        if (self.DEBUG_FLAG == True): print(len(ready))
+        if (self.DEBUG_FLAG == True): print(len(active))
         # Terminate when active and ready lists are empty
         while ((len(ready) == 0 and len(active) == 0) == False):
-            self.print_schedule()
+            if (self.DEBUG_FLAG == True): self.print_schedule()
             sorted_objects = sorted(ready, key=lambda n: n.priority, reverse=True)
             ready = sorted_objects # array of nodes
-            print("CYCLE: " + str(cycle))
+            if (self.DEBUG_FLAG == True): print("CYCLE: " + str(cycle))
             # Pick an operation, o, for each functional unit
             ops = self.get_operations_for_units(ready)
             if (self.DEBUG_FLAG == True):
@@ -462,11 +462,12 @@ class Lab3:
                         if (out_e.child.status != RETIRED):
                             all_ready = False
                     if (all_ready): # Add d to the Ready set
-                        print("Defining ops ready! Adding " + str(d.line_num) + " to the ready set!")
-                        d.status = READY
-                        ready.append(d)
+                        if (self.DEBUG_FLAG == True): print("Defining ops ready! Adding " + str(d.line_num) + " to the ready set!")
+                        if (d not in ready):
+                            d.status = READY
+                            ready.append(d)
                     else:
-                        print("Defining ops of " + str(d.line_num) + " are not ready")
+                        if (self.DEBUG_FLAG == True): print("Defining ops of " + str(d.line_num) + " are not ready")
 
 
                         
