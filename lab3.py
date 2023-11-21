@@ -299,11 +299,17 @@ class Lab3:
         # TODO: first, boost priority of restricted nodes
         num_restricted = 0
         restricted_ready = []
+        unrestricted_ready = []
         for node in ready:
-            if (node.type == LOAD_OP or node.type == STORE_OP or node.type == MULT_OP):
+            if (node.type == LOAD_OP or node.type == STORE_OP or node.type == MULT_OP or node.type == OUTPUT_OP):
                 num_restricted += 1
                 restricted_ready.append(node)
+            else:
+                unrestricted_ready.append(node)
         
+        if (len(restricted_ready) >= 2):
+
+
         if (len(restricted_ready == 1)):
             # only on f0
             if (restricted_ready[0].type == LOAD_OP or restricted_ready[0].type == STORE_OP):
@@ -315,7 +321,52 @@ class Lab3:
                 f1_node = NOP_OP
                 return [f0_node, f1_node]
         
-        // when get back- keep doing this
+        # f0
+        for node in restricted_ready:
+            # at least one unit still open
+            if (f0_node == NOP_OP or f1_node == NOP_OP):
+                # only on f0
+                if (node.type == LOAD_OP or node.type == STORE_OP):
+                    if (f0_node == NOP_OP): # hasnt been assigned yet
+                        f0_node = node
+                # only on f1
+                if (node.type == MULT_OP):
+                    if (f1_node == NOP_OP): # hasnt been assigned yet
+                        f1_node = node
+                # takes whole cycle
+                if (node.type == OUTPUT_OP):
+                    # havent already assigned either unit
+                    if (f0_node == NOP_OP and f1_node == NOP_OP):
+                        f0_node = node
+                        f1_node = node
+                        ready.remove(node)
+                        return [f0_node, f1_node]
+        
+        # check if we have filled f0 and f1
+        if (f0_node != NOP_OP and f1_node != NOP_OP):
+            ready.remove(f0_node)
+            ready.remove(f1_node)
+            return [f0_node, f1_node]
+
+        # see if there is a loadI we can put in the empty slot
+        for node in ready:
+            if (node.type == LOADI_OP):
+                # check that it is not somehow already one of the issue slots
+                if (f0_node != node and f1_node != node):
+                    # find the open slot
+                    if (f0_node == NOP_OP):
+                        f0_node = node
+                    elif (f1_node == NOP_OP):
+                        f1_node = node
+        if (f0_node in ready):
+            ready.remove(f0_node)
+        if (f1_node in ready):
+            ready.remove(f1_node)
+        
+        # now we do it soley based on priority
+            
+        
+        
 
 
         
