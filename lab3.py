@@ -566,7 +566,7 @@ class Lab3:
         if (child_node.line_num in parent_node.outof_edges):
             # print("[check_for_edge] an edge exists already btwn parent and child")
             edge = parent_node.outof_edges[child_node.line_num]
-            print(edge)
+            # print(edge)
             if (edge.kind == DATA):
                 # print("[check_for_edge] the edge between parent and child is a data edge. do not add new special edge.")
                 return True
