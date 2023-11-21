@@ -33,6 +33,10 @@ run the original (not scheduled) code against simulator: ./lab3/sim -t -s 3 ./dg
 ./schedule ./block10.i >> my_scheduled_block10.i
 ./lab3/sim -t -s 1 ./my_scheduled_block10.i>> my_sim_scheduled_block10.i
 
+./lab3/sim -t -s 1 -i 2000 0 1 2 3 4 5 ./ref_report01.i >> sim_ref_report01.i
+
+./lab3/sim -t -s 1 -i 2000 0 1 2 3 4 5 ./attempt_earlyrelease_report01.i >> my_sim_attempt_earlyrelease_report01.i
+
 compare simulator's scheduled output (sim_scheduled_dgslide4.i) vs original output (sim_notscheduled_dgslide.i)
 
 in the lab3 directory in clear: ./lab3_ref report/report01.i | ./sim -t -s 1

@@ -1,0 +1,35 @@
+Testing '/clear/courses/comp412/students/lab3/lab3_ref' on files in /clear/courses/comp412/students/lab3/report
+Run on 11-20-23 at 23:17:38
+
+Executing in directory: '/clear/courses/comp412/students/lab3'
+On files from directory: '/clear/courses/comp412/students/lab3/report'
+
+		  Result	Scheduled	Original
+
+For report01.i:	  correct  	25 cycles	62 cycles
+For report02.i:	  correct  	23 cycles	35 cycles
+For report03.i:	  correct  	26 cycles	40 cycles
+For report04.i:	  correct  	33 cycles	35 cycles
+For report05.i:	  correct  	25 cycles	47 cycles
+For report06.i:	  correct  	44 cycles	95 cycles
+For report07.i:	  correct  	36 cycles	80 cycles
+For report08.i:	  correct  	15 cycles	26 cycles
+For report09.i:	  correct  	26 cycles	44 cycles
+For report10.i:	  correct  	40 cycles	74 cycles
+For report11.i:	  correct  	30 cycles	54 cycles
+For report12.i:	  correct  	21 cycles	26 cycles
+For report13.i:	  correct  	25 cycles	30 cycles
+For report14.i:	  correct  	19 cycles	21 cycles
+For report15.i:	  correct  	23 cycles	30 cycles
+For report16.i:	  correct  	52 cycles	54 cycles
+For report17.i:	  correct  	21 cycles	51 cycles
+For report18.i:	  correct  	22 cycles	21 cycles
+For report19.i:	  correct  	38 cycles	43 cycles
+For report20.i:	  correct  	22 cycles	39 cycles
+For report21.i:	  correct  	72 cycles	176 cycles
+For report22.i:	  correct  	52 cycles	69 cycles
+For report23.i:	  correct  	69 cycles	119 cycles
+
+Removing /tmp/rew9
+
+Test run exits successfully.

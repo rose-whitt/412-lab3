@@ -151,7 +151,7 @@ class Lab3:
             self.set_priorities(root)
         
         if (self.DEBUG_FLAG == True): self.DP_MAP.print_dot()
-
+        # self.DP_MAP.print_dot()
 
         if (self.DEBUG_FLAG == True):
             self.DP_MAP.print_vrtonode()
@@ -296,18 +296,27 @@ class Lab3:
         if (len(ready) == 0):
             return [NOP_OP, NOP_OP]
         
-        # # first, boost priority of restricted nodes
-        # num_restricted = 0
-        # restricted_ready = []
-        # for node in ready:
-        #     if (node.type == LOAD_OP or node.type == STORE_OP or node.type == MULT_OP):
-        #         num_restricted += 1
-        #         restricted_ready.append(node)
+        # TODO: first, boost priority of restricted nodes
+        num_restricted = 0
+        restricted_ready = []
+        for node in ready:
+            if (node.type == LOAD_OP or node.type == STORE_OP or node.type == MULT_OP):
+                num_restricted += 1
+                restricted_ready.append(node)
         
-        # if (len(restricted_ready == 1)):
-        #     # only on f0
-        #     if (restricted_ready[0].type == LOAD_OP or restricted_ready[0].type == STORE_OP):
-        #         f0_node = restricted_ready[0]
+        if (len(restricted_ready == 1)):
+            # only on f0
+            if (restricted_ready[0].type == LOAD_OP or restricted_ready[0].type == STORE_OP):
+                f0_node = restricted_ready[0]
+            elif (restricted_ready[0].type == MULT_OP): # only on f1
+                f1_node = restricted_ready[0]
+            elif (restricted_ready[0].type == OUTPUT_OP):
+                f0_node = restricted_ready[0]
+                f1_node = NOP_OP
+                return [f0_node, f1_node]
+        
+        // when get back- keep doing this
+
 
         
 
@@ -490,10 +499,20 @@ class Lab3:
 
                         
             
-            # TODO: (DO LATER BC ITS FOR EFFECTIVENESS NOT CORRECTNESS)
-            # Find each multi-cycle (load, store, mult) operation o in Active
-                # Check operations that depend on o for early releases
-                    # Add any early release to ready
+            # # TODO: (DO LATER BC ITS FOR EFFECTIVENESS NOT CORRECTNESS)
+            # multi_cycle_active = []
+            # for pair in active:
+            #     if (pair[0].type == LOAD_OP or pair[0].type == STORE_OP or pair[0].type == MULT_OP):
+            #         multi_cycle_active.append(pair)
+            # # Find each multi-cycle (load, store, mult) operation o in Active
+            # for pair in multi_cycle_active:
+            #     # Check operations that depend on o for early releases (into, parent)
+            #     for parent_linenum, edge in pair[0].into_edges.items():
+            #         if (edge.kind == SERIAL):
+            #             # Add any early release to ready
+            #             if (edge.parent not in ready):
+            #                 edge.parent.status = READY
+            #                 ready.append(edge.parent)
 
 
 

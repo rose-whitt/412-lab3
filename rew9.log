@@ -1,0 +1,54 @@
+Testing './schedule' on files in /storage-home/r/rew9/comp412/412-lab3/lab3/report
+Run on 11-21-23 at 00:04:15
+
+Executing in directory: '.'
+On files from directory: '/storage-home/r/rew9/comp412/412-lab3/lab3/report'
+
+		  Result	Scheduled	Original
+
+For report01.i:	  correct  	41 cycles	62 cycles
+For report02.i:	  correct  	27 cycles	35 cycles
+For report03.i:	  correct  	30 cycles	40 cycles
+For report04.i:	-->	 incorrect results
+
+For report05.i:	-->	 incorrect results
+
+For report06.i:	-->	 incorrect results
+
+For report07.i:	-->	 incorrect results
+
+For report08.i:	-->	 incorrect results
+
+For report09.i:	-->	 incorrect results
+
+For report10.i:	-->	 incorrect results
+
+For report11.i:	-->	 incorrect results
+
+For report12.i:	-->	 incorrect results
+
+For report13.i:	  correct  	30 cycles	30 cycles
+For report14.i:	-->	 incorrect results
+
+For report15.i:	-->	 incorrect results
+
+For report16.i:	-->	 incorrect results
+
+For report17.i:	-->	 incorrect results
+
+For report18.i:	-->	 incorrect results
+
+For report19.i:	-->	 incorrect results
+
+For report20.i:	-->	 incorrect results
+
+For report21.i:	-->	 incorrect results
+
+For report22.i:	-->	 incorrect results
+
+For report23.i:	-->	 incorrect results
+
+
+Removing /tmp/rew9
+
+Test run exits successfully.
