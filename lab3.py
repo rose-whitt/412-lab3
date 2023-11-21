@@ -34,6 +34,10 @@ DATA = 0
 SERIAL = 1
 CONFLICT = 2
 
+# UNITS
+F0 = 0
+F1 = 1
+
 
 class Lab3:
     """
@@ -51,6 +55,12 @@ class Lab3:
         self.node_to_all_parents = {}
         self.nodes_to_paths = {}
         self.node_edge_map = {}
+
+        # scheduling
+        # initialize both unit dictionaries to have number of nodes issue slots
+        #  each keyed 1 - number of nodes, with the value being None, but will be replaced by node
+        self.schedule = {F0: {}, F1: {}}    
+        self.num_nodes = 0
 
     def build_graph(self):
         # print("WASSUP BITCH")
@@ -123,9 +133,6 @@ class Lab3:
         self.DP_MAP.print_dot()
 
 
-        # for root in self.roots:
-        #     print("[Calling DFS for root at line " + str(root.line_num) + "]")
-        #     self.DFS_one_path(root)
         if (self.DEBUG_FLAG == True):
             self.DP_MAP.print_vrtonode()
         self.DP_MAP.graph_consistency_checker()
@@ -229,9 +236,39 @@ class Lab3:
 
     
     def schedule_algo(self):
+        if (self.DEBUG_FLAG == True): print("[SCHEDULE ALGO]")
+
         cycle = 1
-        ready = self.leaves
+        ready = self.leaves # array of nodes
+        active = [] # array of pairs- (node, cycle that the node will come off the active list)
+
+        # Terminate when active and ready lists are empty
+        # while (len(ready) != 0 and len(active) != 0):
+
+    def print_schedule(self):
+        sched_len = len(self.schedule[F0])
+        print(sched_len)
+        for i in range(1, sched_len + 1):
+            print("[ " + str(self.schedule[F0][i]) + " ; " + str(self.schedule[F1][i]) + "]")
+
+
+
+    def main_schedule(self):
+        if (self.DEBUG_FLAG == True): print("[MAIN SCHEDULE]")
+        # set number of nodes
+        self.num_nodes = len(self.DP_MAP.nodes_map)
+        if (self.DEBUG_FLAG == True):
+            print(str(self.num_nodes) + " nodes")
         
+        # initialize schedule
+        for i in range(1, self.num_nodes + 1):
+            self.schedule[F0][i] = 0
+            self.schedule[F1][i] = 0
+
+
+        self.schedule_algo()
+        self.print_schedule()
+
         
 
 
@@ -323,6 +360,7 @@ def main():
         
         Lab_3 = Lab3(Lab_2.IR_LIST, DEBUG_FLAG)
         Lab_3.build_graph()
+        Lab_3.main_schedule()
 
 
 
