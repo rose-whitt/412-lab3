@@ -310,7 +310,7 @@ class Lab3:
                 node.status = READY
       
         if (self.DEBUG_FLAG == True):
-            self.debuprint("RESTRICTED READY:")
+            print("RESTRICTED READY:")
             self.print_ready(restricted_ready)
             print("UNRESTRICTED READY:")
             self.print_ready(unrestricted_ready)
