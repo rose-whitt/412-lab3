@@ -572,6 +572,8 @@ class Lab3:
             if (self.DEBUG_FLAG == True): print("CYCLE: " + str(cycle))
             # Pick an operation, o, for each functional unit
             ops = self.get_operations_for_units(ready)
+
+            early_release_ops = []
             
             if (self.DEBUG_FLAG == True):
                 print(len(ops))
@@ -586,9 +588,13 @@ class Lab3:
             if (f0_op != NOP_OP):
                 f0_op.status = ACTIVE
                 active.append((f0_op, f0_op.delay + cycle))
+                if (f0_op == LOAD_OP or f0_op == STORE_OP or f0_op == OUTPUT_OP):
+                    early_release_ops.append(f0_op)
             if (f1_op != NOP_OP):
                 f1_op.status = ACTIVE
                 active.append((f1_op, f1_op.delay + cycle))
+                if (f1_op == LOAD_OP or f1_op == STORE_OP or f1_op == OUTPUT_OP):
+                    early_release_ops.append(f1_op)
             self.schedule[F0][cycle] = f0_op
             self.schedule[F1][cycle] = f1_op
 
@@ -632,17 +638,22 @@ class Lab3:
 
 
                         
-            
+            # If this iteration of the while loop added a load, store, or output operation to the active set, call it x
+
             # "for each operation y that has a serial dependence back to op in active_set,
             # If all the other dependences for y have been satisfied,
             # then y can move onto the Ready set now that operation op has been scheduled.
             # satisified means: all other non-serial dependences are finished and all serial dependences are scheduled
             multi_cycle_active = []
             for pair in active:
-                if (pair[0].type == LOAD_OP or pair[0].type == STORE_OP or pair[0].type == MULT_OP):
+                if (pair[0].type == LOAD_OP or pair[0].type == STORE_OP or pair[0].type == OUTPUT_OP):
                     multi_cycle_active.append(pair)
+                
+            if (self.DEBUG_FLAG == True): 
+                print("len(multi_cycle_active) = " + str(len(multi_cycle_active)) + " vs. len(early_release_ops) = " + str(len(early_release_ops)))
+            
             # Find each multi-cycle (load, store, mult) operation o in Active
-            for pair in multi_cycle_active:
+            for pair in early_release_ops:
                 # Check operations that depend on o for early releases (into, parent)
                 #for each operation y that has a serial dependence back to op in active_set
                 for parent_linenum, edge in pair[0].into_edges.items():
@@ -652,17 +663,18 @@ class Lab3:
                         # check all dependences of edge.parent (y)
                         for pl, e in y.outof_edges.items():
                             # check all non-serial dependences are finished 
-                            if (e.kind != SERIAL and e.child.status != RETIRED):
-                                satisfied = False
-                            if (e.kind == SERIAL and e.child.status != ACTIVE):
-                                satisfied = False
+                            if (e.kind == SERIAL):
+                                if (e.child.status != ACTIVE):
+                                    satisfied = False
+                            else:
+                                if (e.child.status != RETIRED):
+                                    satisfied = False
                         if (satisfied): # Add y to the Ready set
                             if (self.DEBUG_FLAG == True): print("early release- Adding " + str(d.line_num) + " to the ready set!")
-                            if (d not in ready):
-                                d.status = READY
-                                ready.append(d)
+                            y.status = READY
+                            ready.append(y)
                         else:
-                            if (self.DEBUG_FLAG == True): print("Depending ops of " + str(d.line_num) + " are not ready")
+                            if (self.DEBUG_FLAG == True): print("early release- Depending ops of " + str(d.line_num) + " are not ready")
 
                             
 
