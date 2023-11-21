@@ -283,6 +283,10 @@ class Lab3:
             
             returns array where index 0 is node for f0 and index 1 is node for f1
         """
+        f0_node = None
+        f1_node = None
+
+
         if (self.DEBUG_FLAG == True):
             print("[get_operations_for_units]")
             print("READY BEFORE")
@@ -291,6 +295,22 @@ class Lab3:
 
         if (len(ready) == 0):
             return [NOP_OP, NOP_OP]
+        
+        # # first, boost priority of restricted nodes
+        # num_restricted = 0
+        # restricted_ready = []
+        # for node in ready:
+        #     if (node.type == LOAD_OP or node.type == STORE_OP or node.type == MULT_OP):
+        #         num_restricted += 1
+        #         restricted_ready.append(node)
+        
+        # if (len(restricted_ready == 1)):
+        #     # only on f0
+        #     if (restricted_ready[0].type == LOAD_OP or restricted_ready[0].type == STORE_OP):
+        #         f0_node = restricted_ready[0]
+
+        
+
         # get highest priority node from ready
         highest_priority = []
         first_node_prior = ready[0].priority    # bc sorted
@@ -309,7 +329,6 @@ class Lab3:
 
         # choose for functional unit 0
         # find first one that can be in unit 0, start by looking for only f0 (load and store)
-        f0_node = None
         for node in highest_priority:
             if (node.type == LOAD_OP or node.type == STORE_OP):
                 f0_node = node
@@ -365,7 +384,6 @@ class Lab3:
         
         # choose for functional unit 1
         # find first one that can be in unit 1, start by looking for only f1 (mult)
-        f1_node = None
         for node in highest_priority:
             if (node.type == MULT_OP):
                 f1_node = node
@@ -515,9 +533,9 @@ class Lab3:
             print(str(self.num_nodes) + " nodes")
         
         # initialize schedule
-        for i in range(1, self.num_nodes + 1):
-            self.schedule[F0][i] = None
-            self.schedule[F1][i] = None
+        # for i in range(1, self.num_nodes + 1):
+        #     self.schedule[F0][i] = None
+        #     self.schedule[F1][i] = None
 
         self.schedule_algo()
         self.print_schedule()

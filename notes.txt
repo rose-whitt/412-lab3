@@ -2,6 +2,37 @@ run reference to get scheduled code: ~comp412/students/lab3/lab3_ref -s -g ./dgs
 run the scheduled code against simulator: ./lab3/sim -t -s 1 ./scheduled_dgslide4_ref.i >> sim_scheduled_dgslide4.i
 run the original (not scheduled) code against simulator: ./lab3/sim -t -s 3 ./dgslide4.i >> sim_notscheduled_dgslide.i
 
+./lab3/sim -t -s 1 ./scheduled_dgslide17_ref.i >> sim_scheduled_dgslide17.i
+./lab3/sim -t -s 1 -i 8 3 4 ./my_scheduled_dgslide17.i >> my_sim_scheduled_dgslide17.i
+./lab3/sim -t -s 1 -i 8 3 4 ./scheduled_dgslide17_ref.i >> sim_scheduled_dgslide17_ref.i
+~comp412/students/lab3/lab3_ref -s -g ./lab3/ >> scheduled_dgslide4_ref.i
+
+
+~comp412/students/lab3/lab3_ref -s -g ./lab3/examples/L3-DG1.i >> scheduled_L3-DG1_ref.i
+./lab3/sim -t -s 1 -i 8 3 4 ./scheduled_L3-DG1_ref.i >> sim_scheduled_L3-DG1_ref.i
+
+./schedule ./lab3/examples/L3-DG1.i >> my_scheduled_L3-DG1.i
+./lab3/sim -t -s 1 -i 8 3 4 ./my_scheduled_L3-DG1.i >> my_sim_scheduled_L3-DG1.i
+
+~comp412/students/lab3/lab3_ref -s -g ./lab3/examples/L3-Perf2.i >> scheduled_L3-Perf2_ref.i
+./lab3/sim -t -s 1 -i 8 3 4 ./scheduled_L3-Perf2_ref.i >> sim_scheduled_L3-Perf2_ref.i
+
+./schedule ./lab3/examples/L3-Perf2.i >> my_scheduled_L3-Perf2.i
+./lab3/sim -t -s 1 -i 8 3 4 ./my_scheduled_L3-Perf2.i >> my_sim_scheduled_L3-Perf2.i
+
+~comp412/students/lab3/lab3_ref -s -g ./lab3/examples/L3-Perf3.i >> scheduled_L3-Perf3_ref.i
+./lab3/sim -t -s 1 ./scheduled_L3-Perf3_ref.i >> sim_scheduled_L3-Perf3_ref.i
+
+./schedule ./lab3/examples/L3-Perf3.i >> my_scheduled_L3-Perf3.i
+./lab3/sim -t -s 1 ./my_scheduled_L3-Perf3.i >> my_sim_scheduled_L3-Perf3.i
+
+
+~comp412/students/lab3/lab3_ref -s -g ./block10.i >> scheduled_block10_ref.i
+./lab3/sim -t -s 1 ./scheduled_block10_ref.i>> sim_scheduled_block10_ref.i
+
+./schedule ./block10.i >> my_scheduled_block10.i
+./lab3/sim -t -s 1 ./my_scheduled_block10.i>> my_sim_scheduled_block10.i
+
 compare simulator's scheduled output (sim_scheduled_dgslide4.i) vs original output (sim_notscheduled_dgslide.i)
 
 in the lab3 directory in clear: ./lab3_ref report/report01.i | ./sim -t -s 1
