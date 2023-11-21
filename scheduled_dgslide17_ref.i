@@ -1,0 +1,15 @@
+// Average Ready Queue Length: 0
+// COMP 412, Lab 3 Reference Implementation
+[ loadI  12 => r4 ; loadI  8 => r3 ]
+[ load   r3 => r2 ; add    r3, r4  => r0 ]
+[ load   r0 => r1 ; nop ]
+[ nop    ; nop ]
+[ nop    ; nop ]
+[ nop    ; nop ]
+[ nop    ; nop ]
+[ store  r1 => r0 ; nop ]
+[ nop    ; nop ]
+[ nop    ; nop ]
+[ nop    ; nop ]
+[ nop    ; nop ]
+[ output 12 ; nop ]

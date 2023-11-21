@@ -8,7 +8,7 @@ the operation commits.
 
 For example, the command
 
-    ./lab3_ref report/report1.i | ./sim -t -s 1
+    ./lab3_ref report/report01.i | ./sim -t -s 1
 
 executed in the ~comp412/students/lab3 directory produces the following trace
 

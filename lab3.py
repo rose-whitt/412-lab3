@@ -185,17 +185,6 @@ class Lab3:
         return node_paths
 
 
-
-    def assign_paths_to_nodes(self):
-        for node in self.DP_MAP.nodes_map.values():
-            self.nodes_to_paths[node] = self.get_paths_to_node(node)
-        
-        print("NODES TO PATHS")
-        for node, paths in self.nodes_to_paths.items():
-            print(str(node.line_num) + " : ")
-            for path in paths:
-                print(self.print_node_list_lines(path))
-
     def convert_edge_map(self):
         """
             different graph representation
@@ -238,7 +227,12 @@ class Lab3:
             for neighbor, edge_latency in reversed(self.node_edge_map.get(current, [])):
                 stack.append((neighbor, current_priority + edge_latency))
 
-
+    
+    def schedule_algo(self):
+        cycle = 1
+        ready = self.leaves
+        
+        
 
 
 

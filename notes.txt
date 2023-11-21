@@ -1,1 +1,20 @@
-run reference: ~comp412/students/lab3/lab3_ref -s -g ./dgslide4.i
+run reference to get scheduled code: ~comp412/students/lab3/lab3_ref -s -g ./dgslide4.i >> scheduled_dgslide4_ref.i
+run the scheduled code against simulator: ./lab3/sim -t -s 1 ./scheduled_dgslide4_ref.i >> sim_scheduled_dgslide4.i
+run the original (not scheduled) code against simulator: ./lab3/sim -t -s 3 ./dgslide4.i >> sim_notscheduled_dgslide.i
+
+compare simulator's scheduled output (sim_scheduled_dgslide4.i) vs original output (sim_notscheduled_dgslide.i)
+
+in the lab3 directory in clear: ./lab3_ref report/report01.i | ./sim -t -s 1
+
+debugging:
+    With the scheduler, you need to compare the behavior of the scheduled code against the behavior of the unscheduled code.
+            Use
+                    “sim -t -s 1 …” on the scheduled code
+                and
+                    “sim -t -s 3 … “ on the unscheduled code.
+        You want to find the first place where an operation in the scheduled code produces a different value than the same operation
+         in the original code. Then, figure out why it was getting different operands. 
+         From that, what scheduling error could have caused the error.
+        Inside the scheduler, I typically look at the READY and ACTIVE sets and how the various operations
+        move into and out of those sets. Paying attention to how something gets into and out of those sets usually
+         leads to insights into the error.
