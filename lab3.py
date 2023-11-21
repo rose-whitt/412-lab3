@@ -633,20 +633,44 @@ class Lab3:
 
                         
             
-            # # TODO: (DO LATER BC ITS FOR EFFECTIVENESS NOT CORRECTNESS)
-            # multi_cycle_active = []
-            # for pair in active:
-            #     if (pair[0].type == LOAD_OP or pair[0].type == STORE_OP or pair[0].type == MULT_OP):
-            #         multi_cycle_active.append(pair)
-            # # Find each multi-cycle (load, store, mult) operation o in Active
-            # for pair in multi_cycle_active:
-            #     # Check operations that depend on o for early releases (into, parent)
-            #     for parent_linenum, edge in pair[0].into_edges.items():
-            #         if (edge.kind == SERIAL):
-            #             # Add any early release to ready
-            #             if (edge.parent not in ready):
-            #                 edge.parent.status = READY
-            #                 ready.append(edge.parent)
+            # "for each operation y that has a serial dependence back to op in active_set,
+            # If all the other dependences for y have been satisfied,
+            # then y can move onto the Ready set now that operation op has been scheduled.
+            # satisified means: all other non-serial dependences are finished and all serial dependences are scheduled
+            multi_cycle_active = []
+            for pair in active:
+                if (pair[0].type == LOAD_OP or pair[0].type == STORE_OP or pair[0].type == MULT_OP):
+                    multi_cycle_active.append(pair)
+            # Find each multi-cycle (load, store, mult) operation o in Active
+            for pair in multi_cycle_active:
+                # Check operations that depend on o for early releases (into, parent)
+                #for each operation y that has a serial dependence back to op in active_set
+                for parent_linenum, edge in pair[0].into_edges.items():
+                    satisfied = True
+                    if (edge.kind == SERIAL):
+                        y = edge.parent
+                        # check all dependences of edge.parent (y)
+                        for pl, e in y.outof_edges.items():
+                            # check all non-serial dependences are finished 
+                            if (e.kind != SERIAL and e.child.status != RETIRED):
+                                satisfied = False
+                            if (e.kind == SERIAL and e.child.status != ACTIVE):
+                                satisfied = False
+                        if (satisfied): # Add y to the Ready set
+                            if (self.DEBUG_FLAG == True): print("early release- Adding " + str(d.line_num) + " to the ready set!")
+                            if (d not in ready):
+                                d.status = READY
+                                ready.append(d)
+                        else:
+                            if (self.DEBUG_FLAG == True): print("Depending ops of " + str(d.line_num) + " are not ready")
+
+                            
+
+
+                        # Add any early release to ready
+                        if (edge.parent not in ready):
+                            edge.parent.status = READY
+                            ready.append(edge.parent)
 
 
 
