@@ -774,8 +774,8 @@ class Lab3:
 
 
 def main():
-    # pr = cProfile.Profile()
-    # pr.enable() 
+    pr = cProfile.Profile()
+    pr.enable()
     # print("in lab3 main")
     # print(sys.argv)
     if (sys.argv[1] == '-h'):
@@ -825,6 +825,13 @@ def main():
         Lab_3 = Lab3(Lab_2.IR_LIST, DEBUG_FLAG)
         Lab_3.build_graph()
         Lab_3.main_schedule()
+    
+    pr.disable()
+    s = StringIO()
+    sortby = 'cumulative'
+    ps = pstats.Stats(pr, stream=s).sort_stats(sortby)
+    ps.print_stats()
+    sys.stdout.write(s.getvalue())
 
 
 

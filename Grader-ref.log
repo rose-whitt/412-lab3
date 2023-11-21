@@ -1,0 +1,104 @@
+COMP 412, Lab3, Autograder
+--------------------------
+
+The Lab 3 autograder no longer measures running time.
+Use the autotimer instead. It provides more accurate results.
+
+Correcness and Effectiveness results are printed at the
+bottom of the log. Effectiveness of > 0.90 is full credit.
+
+... Gathering cycle counts from lab3_ref ...
+ 
+======== testing comp412.tar ========
+Name: l3r with simp	NetID: comp412-1
+
+=== building executable ===
+Executing 'make clean'
+echo "cleaned"
+cleaned
+
+Executing 'make build'
+echo "built"
+built
+=== built executable; should be ready to run ===
+
+File		Lab	Ref	Difference
+------------------------------------------
+T001k.i		505	505	0
+report01.i	25	25	0
+report02.i	23	23	0
+report03.i	26	26	0
+report04.i	33	33	0
+report05.i	25	25	0
+report06.i	44	44	0
+report07.i	36	36	0
+report08.i	15	15	0
+report09.i	26	26	0
+report10.i	40	40	0
+report11.i	30	30	0
+report12.i	21	21	0
+report13.i	25	25	0
+report14.i	19	19	0
+report15.i	23	23	0
+report16.i	52	52	0
+report17.i	21	21	0
+report18.i	22	22	0
+report19.i	38	38	0
+report20.i	22	22	0
+report21.i	72	72	0
+report22.i	52	52	0
+report23.i	69	69	0
+
+======= finished comp412.tar =======
+
+======== testing comp412_nosimp.tar ========
+Name: l3r-no-simp	NetID: comp412-2
+
+=== building executable ===
+Executing 'make clean'
+echo "cleaned"
+cleaned
+
+Executing 'make build'
+echo "built"
+built
+=== built executable; should be ready to run ===
+
+File		Lab	Ref	Difference
+------------------------------------------
+T001k.i		505	505	0
+report01.i	38	25	13
+report02.i	23	23	0
+report03.i	26	26	0
+report04.i	36	33	3
+report05.i	32	25	7
+report06.i	85	44	41
+report07.i	44	36	8
+report08.i	15	15	0
+report09.i	40	26	14
+report10.i	48	40	8
+report11.i	38	30	8
+report12.i	21	21	0
+report13.i	26	25	1
+report14.i	19	19	0
+report15.i	30	23	7
+report16.i	53	52	1
+report17.i	22	21	1
+report18.i	18	22	-4
+report19.i	39	38	1
+report20.i	68	22	46
+report21.i	72	72	0
+report22.i	52	52	0
+report23.i	69	69	0
+
+======= finished comp412_nosimp.tar =======
+
+
+Correctness results:	(sorted NetID order)
+	 l3r with simp 	 comp412-1 	 1.0
+	 l3r-no-simp 	 comp412-2 	 1.0
+
+Effectiveness Results:	(sorted point order)
+	 l3r-no-simp 	 comp412-2 	 0.896
+	 l3r with simp 	 comp412-1 	 1.0
+ 

@@ -1,0 +1,5 @@
+Shows % of efficiencty points
+Calculated from 110% of lab3_ref
+
+name	netid	points
+Rose Whitt	rew9	0.7001582278481013

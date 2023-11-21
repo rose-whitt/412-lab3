@@ -1,0 +1,2 @@
+Shows NetIDs of labs that failed to get any correctness points
+

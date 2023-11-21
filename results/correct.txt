@@ -1,0 +1,4 @@
+Shows % of correctness points
+
+Name	NetID	Correctness Score
+Rose Whitt	rew9	1.0

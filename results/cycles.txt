@@ -1,0 +1,5 @@
+Shows cycle counts for student lab by each test file
+Need a wide window ...
+
+Name	NetID	T001k.i	report01.i	report02.i	report03.i	report04.i	report05.i	report06.i	report07.i	report08.i	report09.i	report10.i	report11.i	report12.i	report13.i	report14.i	report15.i	report16.i	report17.i	report18.i	report19.i	report20.i	report21.i	report22.i	report23.i
+Rose Whitt	rew9	506	39	23	26	48	84	122	74	15	44	79	79	28	30	22	63	101	25	35	47	68	80	58	77
