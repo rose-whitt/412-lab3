@@ -289,7 +289,8 @@ class Lab3:
             self.print_ready(ready)
 
 
-
+        if (len(ready) == 0):
+            return [NOP_OP, NOP_OP]
         # get highest priority node from ready
         highest_priority = []
         first_node_prior = ready[0].priority    # bc sorted
@@ -387,7 +388,7 @@ class Lab3:
         ret = [f0_node, f1_node]
         if (self.DEBUG_FLAG == True):
             print("RETURN VALUE:")
-            self.print_ready(ret)
+            print(ret)
         
         return ret
 
@@ -409,7 +410,10 @@ class Lab3:
         print(len(active))
         # Terminate when active and ready lists are empty
         while ((len(ready) == 0 and len(active) == 0) == False):
-            print("POOO")
+            self.print_schedule()
+            sorted_objects = sorted(ready, key=lambda n: n.priority, reverse=True)
+            ready = sorted_objects # array of nodes
+            print("CYCLE: " + str(cycle))
             # Pick an operation, o, for each functional unit
             ops = self.get_operations_for_units(ready)
             if (self.DEBUG_FLAG == True):
@@ -418,10 +422,15 @@ class Lab3:
             f0_op = ops[F0]
             f1_op = ops[F1]
             # Move o from Ready to Active
-            f0_op.status = ACTIVE
-            f1_op.status = ACTIVE
-            active.append((f0_op, f0_op.delay + cycle))
-            active.append((f1_op, f1_op.delay + cycle))
+            if (f0_op != NOP_OP):
+                f0_op.status = ACTIVE
+                active.append((f0_op, f0_op.delay + cycle))
+            if (f1_op != NOP_OP):
+                f1_op.status = ACTIVE
+                active.append((f1_op, f1_op.delay + cycle))
+            self.schedule[F0][cycle] = f0_op
+            self.schedule[F1][cycle] = f1_op
+
 
             if (self.DEBUG_FLAG == True):
                 print("ACTIVE AFTER APPENDING")
@@ -430,20 +439,44 @@ class Lab3:
             # Increment cycle
             cycle += 1
 
-            # Find each op, o, in Active that retires
+            # get active ops that have retired
+            retired = []
             for pair in active:
                 if (pair[1] == cycle):
-                    # Remove o from Active
-                    active.remove(pair[0])
+                    retired.append(pair)
                     pair[0].status = RETIRED
-                    # For each op, d, that depends on o (into_edges, d = parent)
-                        # If d is now "ready" (operation that defined that operand is completed/retired)
-                            # Add d to the Ready set
+            
+
+            # Find each op, o, in Active that retires
+            for pair in retired:
+                # Remove o from Active
+                active.remove(pair)
+                # For each op, d, that depends on o (into, d = parent)
+                for parent_linenum, edge in pair[0].into_edges.items():
+                    d = edge.parent
+                    
+                    all_ready = True
+                    # check outof nodes of d
+                    for child_linenum, out_e in d.outof_edges.items():
+                        # If d is now "ready" (operation that defined that operand is completed/retired- "If a node represents a use of a value, it has an edge to the node that defines that value")
+                        if (out_e.child.status != RETIRED):
+                            all_ready = False
+                    if (all_ready): # Add d to the Ready set
+                        print("Defining ops ready! Adding " + str(d.line_num) + " to the ready set!")
+                        d.status = READY
+                        ready.append(d)
+                    else:
+                        print("Defining ops of " + str(d.line_num) + " are not ready")
+
+
+                        
             
             # TODO: (DO LATER BC ITS FOR EFFECTIVENESS NOT CORRECTNESS)
             # Find each multi-cycle (load, store, mult) operation o in Active
                 # Check operations that depend on o for early releases
                     # Add any early release to ready
+
+
 
     def print_schedule(self):
         sched_len = len(self.schedule[F0])
@@ -462,7 +495,7 @@ class Lab3:
             
             ret += " ; "
 
-            if f0_value == NOP_OP:
+            if f1_value == NOP_OP:
                 ret += opcodes_list[NOP_OP]
             elif f1_value != None:
                 ret += self.DP_MAP.get_ir_node(f1_value.ir_list_node)
@@ -520,6 +553,14 @@ class Lab3:
                 return True
         return False
                 
+    def print_retired(self):
+        tmp = "[ "
+        for node in self.DP_MAP.nodes_map.values():
+            if (node.status == RETIRED):
+                tmp += str(node.line_num)
+                tmp += " "
+        tmp += "]"
+        print(tmp)
 
        
 
