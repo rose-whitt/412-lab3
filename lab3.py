@@ -667,12 +667,6 @@ class Lab3:
                             
 
 
-                        # Add any early release to ready
-                        if (edge.parent not in ready):
-                            edge.parent.status = READY
-                            ready.append(edge.parent)
-
-
 
     def print_schedule(self):
         sched_len = len(self.schedule[F0])
