@@ -7,6 +7,8 @@ import math
 import cProfile, pstats
 from io import StringIO
 from DP_MAP import *
+import copy
+
 
 
 CATEGORIES = ["MEMOP", "LOADI", "ARITHOP", "OUTPUT", "NOP", "CONST", "REG", "COMMA", "INTO", "ENDFILE", "NEWLINE"]
@@ -24,6 +26,18 @@ RSHIFT_OP = 7
 OUTPUT_OP = 8
 NOP_OP = 9
 
+# LATENCIES (HANDOUT APPENDIX B)
+LOAD_LATENCY = 5
+LOADI_LATENCY = 1
+STORE_LATENCY = 5
+ADD_LATENCY = 1
+SUB_LATENCY = 1
+MULT_LATENCY = 3
+LSHIFT_LATENCY = 1
+RSHIFT_LATENCY = 1
+OUTPUT_LATENCY = 1
+NOP_LATENCY = 1
+
 # MACROS
 INVALID = -1
 INF = math.inf
@@ -37,6 +51,12 @@ CONFLICT = 2
 # UNITS
 F0 = 0
 F1 = 1
+
+# STATUSES
+NOT_READY = 1
+READY = 2
+ACTIVE = 3
+RETIRED = 4
 
 
 class Lab3:
@@ -234,22 +254,222 @@ class Lab3:
             for neighbor, edge_latency in reversed(self.node_edge_map.get(current, [])):
                 stack.append((neighbor, current_priority + edge_latency))
 
+    def print_ready(self, ready):
+        ret = "["
+        for node in ready:
+            tmp = "<" + str(node.line_num) + " " + str(opcodes_list[node.type]) + " , " + str(node.priority) + ">, "
+            ret += tmp
+        ret += "]"
+        print(ret)
+    
+    def print_active(self, active):
+        ret = "["
+        for pair in active:
+            tmp = "<" + str(pair[0].line_num) + " " + str(opcodes_list[pair[0].type]) + " , #" + str(pair[1]) + ">, "
+            ret += tmp
+        ret += "]"
+        print(ret)
+    
+
+
+    def get_operations_for_units(self, ready):
+        """
+            Get an operation for each functional unit based on the highest priority and remove those from ready
+                and these constraints:
+                Load and store operations: only f0
+                loadI: f0 or f1
+                Mult: f1
+                Output: f0 or f1, but only one per cycle (latency == cycle counts)
+            
+            returns array where index 0 is node for f0 and index 1 is node for f1
+        """
+        if (self.DEBUG_FLAG == True):
+            print("[get_operations_for_units]")
+            print("READY BEFORE")
+            self.print_ready(ready)
+
+
+
+        # get highest priority node from ready
+        highest_priority = []
+        first_node_prior = ready[0].priority    # bc sorted
+        for node in ready:
+            node.status = READY
+            if (node.priority == first_node_prior):
+                highest_priority.append(node)
+        
+        if (self.DEBUG_FLAG == True):
+            print("HIGHEST PRIORITY:")
+            self.print_ready(highest_priority)
+            print("READY AFTER:")
+            self.print_ready(ready)
+
+
+
+        # choose for functional unit 0
+        # find first one that can be in unit 0, start by looking for only f0 (load and store)
+        f0_node = None
+        for node in highest_priority:
+            if (node.type == LOAD_OP or node.type == STORE_OP):
+                f0_node = node
+                break
+
+        # if no load or store found, just find operation that isnt mult (aka can go in f0)
+        if (f0_node == None):
+            for node in highest_priority:
+                if (node.type != MULT_OP):
+                    f0_node = node
+                    break
+
+        # if we found an f0 node
+        if (f0_node != None):
+            # remove from list with highest priority nodes
+            highest_priority.remove(f0_node)
+            # remove f0_node from ready
+            ready.remove(f0_node)
+
+            if (self.DEBUG_FLAG == True):
+                print("HIGHEST PRIORITY AFTER F0NODE:")
+                self.print_ready(highest_priority)
+            
+            # output can only have one per cycle
+            if f0_node.type == OUTPUT_OP:
+                return [f0_node, NOP_OP]
+            
+
+            # if f0 took the only highest priority node, recompute highest priority nodes
+            if (len(highest_priority) == 0):
+                
+                if (self.DEBUG_FLAG == True):
+                    print("READY AFTER REMOVE F0NODE:")
+                    self.print_ready(ready)
+                
+                # if nothing left in ready, just return
+                if (len(ready) == 0):
+                    return [f0_node, NOP_OP]
+                else:
+                    first_node_prior = ready[0].priority    # bc sorted
+                    for node in ready:
+                        if (node.priority == first_node_prior):
+                            highest_priority.append(node)
+        else:
+            # set to nop if we didn't find anything
+            f0_node = NOP_OP
+        
+        if (self.DEBUG_FLAG == True):
+            print("HIGHEST PRIORITY B4 f1:")
+            self.print_ready(highest_priority)
+            print("READY B4 f1:")
+            self.print_ready(ready)
+        
+        # choose for functional unit 1
+        # find first one that can be in unit 1, start by looking for only f1 (mult)
+        f1_node = None
+        for node in highest_priority:
+            if (node.type == MULT_OP):
+                f1_node = node
+                break
+        
+        # if no mult found, just find operation that can go in f1 (not load or store)
+        if (f1_node == None):
+            for node in highest_priority:
+                if (node.type != LOAD_OP and node.type != STORE_OP):
+                    f1_node = node
+                    break
+        
+        # if we found an f0 node
+        if (f1_node == None):
+            # set to nop if we didn't find anything
+            f1_node = NOP_OP
+        else:
+            ready.remove(f1_node)
+        
+        ret = [f0_node, f1_node]
+        if (self.DEBUG_FLAG == True):
+            print("RETURN VALUE:")
+            self.print_ready(ret)
+        
+        return ret
+
+    
     
     def schedule_algo(self):
         if (self.DEBUG_FLAG == True): print("[SCHEDULE ALGO]")
 
         cycle = 1
-        ready = self.leaves # array of nodes
+        # Sort the list in descending order based on the age attribute
+        sorted_objects = sorted(self.leaves, key=lambda n: n.priority, reverse=True)
+        ready = sorted_objects # array of nodes
         active = [] # array of pairs- (node, cycle that the node will come off the active list)
 
+        # if (self.DEBUG_FLAG == True): self.print_ready(ready)
+
+        if (self.DEBUG_FLAG == True): print("BEGINNING WHILE LOOP")
+        print(len(ready))
+        print(len(active))
         # Terminate when active and ready lists are empty
-        # while (len(ready) != 0 and len(active) != 0):
+        while ((len(ready) == 0 and len(active) == 0) == False):
+            print("POOO")
+            # Pick an operation, o, for each functional unit
+            ops = self.get_operations_for_units(ready)
+            if (self.DEBUG_FLAG == True):
+                self.print_ready(ready)
+                self.print_active(active)
+            f0_op = ops[F0]
+            f1_op = ops[F1]
+            # Move o from Ready to Active
+            f0_op.status = ACTIVE
+            f1_op.status = ACTIVE
+            active.append((f0_op, f0_op.delay + cycle))
+            active.append((f1_op, f1_op.delay + cycle))
+
+            if (self.DEBUG_FLAG == True):
+                print("ACTIVE AFTER APPENDING")
+                self.print_active(active)
+
+            # Increment cycle
+            cycle += 1
+
+            # Find each op, o, in Active that retires
+            for pair in active:
+                if (pair[1] == cycle):
+                    # Remove o from Active
+                    active.remove(pair[0])
+                    pair[0].status = RETIRED
+                    # For each op, d, that depends on o (into_edges, d = parent)
+                        # If d is now "ready" (operation that defined that operand is completed/retired)
+                            # Add d to the Ready set
+            
+            # TODO: (DO LATER BC ITS FOR EFFECTIVENESS NOT CORRECTNESS)
+            # Find each multi-cycle (load, store, mult) operation o in Active
+                # Check operations that depend on o for early releases
+                    # Add any early release to ready
 
     def print_schedule(self):
         sched_len = len(self.schedule[F0])
-        print(sched_len)
+        # print(sched_len)
+        ret = ""
         for i in range(1, sched_len + 1):
-            print("[ " + str(self.schedule[F0][i]) + " ; " + str(self.schedule[F1][i]) + "]")
+            ret += "[ "
+            f0_value = self.schedule[F0][i]
+            f1_value = self.schedule[F1][i]
+            if f0_value == NOP_OP:
+                ret += opcodes_list[NOP_OP]
+            elif f0_value != None:
+                ret += self.DP_MAP.get_ir_node(f0_value.ir_list_node)
+            else:
+                ret += "None"
+            
+            ret += " ; "
+
+            if f0_value == NOP_OP:
+                ret += opcodes_list[NOP_OP]
+            elif f1_value != None:
+                ret += self.DP_MAP.get_ir_node(f1_value.ir_list_node)
+            else:
+                ret += "None"
+            ret += " ]\n"
+        print(ret)
 
 
 
@@ -262,12 +482,13 @@ class Lab3:
         
         # initialize schedule
         for i in range(1, self.num_nodes + 1):
-            self.schedule[F0][i] = 0
-            self.schedule[F1][i] = 0
-
+            self.schedule[F0][i] = None
+            self.schedule[F1][i] = None
 
         self.schedule_algo()
         self.print_schedule()
+        # print(self.DP_MAP.nodes_map[1])
+        # print(self.DP_MAP.get_ir_node(self.DP_MAP.nodes_map[1].ir_list_node))
 
         
 

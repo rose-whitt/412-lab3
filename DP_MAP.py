@@ -35,6 +35,12 @@ NOP_OP = 9
 
 opcodes_list = ["load", "store", "loadI", "add", "sub", "mult", "lshift", "rshift", "output", "nop"]
 
+# STATUSES
+NOT_READY = 1
+READY = 2
+ACTIVE = 3
+RETIRED = 4
+
 
 
 class Edge:
@@ -86,6 +92,9 @@ class OperationNode:
         self.priority = 0
         self.into_edges = {}      # Edges going INTO this node; line num of parent mapped to edge between this node and parent
         self.outof_edges = {}       # Edges coming OUT OF this node; line num of child mapped to edge between this node and child
+
+        # scheduling
+        self.status = NOT_READY
     
     def __str__(self):
         temp_str = ""
@@ -331,7 +340,7 @@ class DependenceGraph:
     
     def get_ir_node(self, node):
         """
-            Given a dependence graph node, returns the IR representation
+            Given an IR node, returns the IR representation
         """
         lh = ""
         rh = ""
@@ -373,7 +382,7 @@ class DependenceGraph:
                 roots.append(node)
             if (len(node.outof_edges) == 0):
                 node.leaf = True
-                leaves.append(leaves)
+                leaves.append(node)
         roots_and_leaves = {0: roots, 1: leaves}
         return roots_and_leaves
 
