@@ -296,173 +296,251 @@ class Lab3:
         if (len(ready) == 0):
             return [NOP_OP, NOP_OP]
         
-        # TODO: first, boost priority of restricted nodes
+        
         num_restricted = 0
         restricted_ready = []
         unrestricted_ready = []
         for node in ready:
             if (node.type == LOAD_OP or node.type == STORE_OP or node.type == MULT_OP or node.type == OUTPUT_OP):
                 num_restricted += 1
+                node.status = READY
                 restricted_ready.append(node)
             else:
                 unrestricted_ready.append(node)
-        
-        if (len(restricted_ready) >= 2):
+                node.status = READY
+      
+        if (self.DEBUG_FLAG == True):
+            self.debuprint("RESTRICTED READY:")
+            self.print_ready(restricted_ready)
+            print("UNRESTRICTED READY:")
+            self.print_ready(unrestricted_ready)
 
-
-        if (len(restricted_ready == 1)):
-            # only on f0
-            if (restricted_ready[0].type == LOAD_OP or restricted_ready[0].type == STORE_OP):
-                f0_node = restricted_ready[0]
-            elif (restricted_ready[0].type == MULT_OP): # only on f1
-                f1_node = restricted_ready[0]
-            elif (restricted_ready[0].type == OUTPUT_OP):
-                f0_node = restricted_ready[0]
-                f1_node = NOP_OP
-                return [f0_node, f1_node]
-        
+        # 🔒🔒🔒🔒🔒🔒🔒 First, restricted nodes 🔒🔒🔒🔒🔒🔒🔒🔒
         # f0
         for node in restricted_ready:
             # at least one unit still open
-            if (f0_node == NOP_OP or f1_node == NOP_OP):
+            if (f0_node == None or f1_node == None):
                 # only on f0
                 if (node.type == LOAD_OP or node.type == STORE_OP):
-                    if (f0_node == NOP_OP): # hasnt been assigned yet
+                    if (f0_node == None): # hasnt been assigned yet
                         f0_node = node
                 # only on f1
                 if (node.type == MULT_OP):
-                    if (f1_node == NOP_OP): # hasnt been assigned yet
+                    if (f1_node == None): # hasnt been assigned yet
                         f1_node = node
                 # takes whole cycle
                 if (node.type == OUTPUT_OP):
                     # havent already assigned either unit
-                    if (f0_node == NOP_OP and f1_node == NOP_OP):
+                    if (f0_node == None and f1_node == None):
                         f0_node = node
-                        f1_node = node
+                        f1_node = NOP_OP
                         ready.remove(node)
                         return [f0_node, f1_node]
         
         # check if we have filled f0 and f1
-        if (f0_node != NOP_OP and f1_node != NOP_OP):
-            ready.remove(f0_node)
-            ready.remove(f1_node)
+        if (f0_node != None and f1_node != None):
+            if (f0_node in ready):  # havent already removed
+                ready.remove(f0_node)
+            if (f1_node in ready):  # havent already removed
+                ready.remove(f1_node)
             return [f0_node, f1_node]
 
+        # check we have removed everything
+        if (f0_node != None and f0_node in ready):
+            ready.remove(f0_node)
+        if (f0_node != None and f0_node in restricted_ready):
+            restricted_ready.remove(f0_node)
+        if (f1_node != None and f1_node in ready):
+            ready.remove(f1_node)
+        if (f1_node != None and f1_node in restricted_ready):
+            restricted_ready.remove(f1_node)
+        
+
+        # 🔒🔒🔒🔒🔒🔒 END OF RESTRICTED READY PRIORITY 🔒🔒🔒🔒🔒🔒🔒🔒🔒
+
+        # ❄️❄️❄️❄️❄️❄️ Next, prioritize loadI ❄️❄️❄️❄️❄️❄️❄️❄️❄️
         # see if there is a loadI we can put in the empty slot
-        for node in ready:
+        for node in unrestricted_ready:
             if (node.type == LOADI_OP):
                 # check that it is not somehow already one of the issue slots
                 if (f0_node != node and f1_node != node):
                     # find the open slot
-                    if (f0_node == NOP_OP):
+                    if (f0_node == None):
                         f0_node = node
-                    elif (f1_node == NOP_OP):
+                    elif (f1_node == None):
                         f1_node = node
+        # check we remove everything
         if (f0_node in ready):
             ready.remove(f0_node)
+        if (f0_node in unrestricted_ready):
+            unrestricted_ready.remove(f0_node)
         if (f1_node in ready):
             ready.remove(f1_node)
+        if (f1_node in unrestricted_ready):
+            unrestricted_ready.remove(f1_node)
         
-        # now we do it soley based on priority
+        # check if we have filled f0 and f1
+        if (f0_node != None and f1_node != None):
+            return [f0_node, f1_node]
+        
+        # ❄️❄️❄️❄️❄️❄️❄️❄️ END OF LOADI PRIORITY ❄️❄️❄️❄️❄️❄️❄️❄️❄️❄️
+
+        # 🏳️‍🌈🏳️‍🌈🏳️‍🌈🏳️‍🌈🏳️‍🌈🏳️‍🌈🏳️‍🌈 Priority based from unrestricted list 🏳️‍🌈🏳️‍🌈🏳️‍🌈🏳️‍🌈🏳️‍🌈🏳️‍🌈🏳️‍🌈🏳️‍🌈
+        # check if there is anything in unrestricted_ready
+        if (len(unrestricted_ready) == 0):
+            # nothing else to do so we need to make the issue slot and return
+            if (f0_node == None):
+                f0_node = NOP_OP
+            if (f1_node == None):
+                f1_node = NOP_OP
+            # return
+            return [f0_node, f1_node]
+
+        # check if there is only one thing in unrestricted ready, so return
+        if (len(unrestricted_ready) == 1):
+            # find the empty slot
+            # both slots open
+            if (f0_node == None and f1_node == None):
+                f0_node = unrestricted_ready[0]
+                f1_node = NOP_OP
+            # only one slot open
+            elif (f0_node == None):
+                f0_node = unrestricted_ready[0]
+            elif (f1_node == None):
+                f1_node = unrestricted_ready[0]
             
-        
-        
+            # check we remove everything
+            if (f0_node in ready):
+                ready.remove(f0_node)
+            if (f0_node in unrestricted_ready):
+                unrestricted_ready.remove(f0_node)
+            if (f1_node in ready):
+                ready.remove(f1_node)
+            if (f1_node in unrestricted_ready):
+                unrestricted_ready.remove(f1_node)
+            # return
+            return [f0_node, f1_node]
+
+        if (len(unrestricted_ready) == 2):
+            # both open
+            if (f0_node == None and f1_node == None):
+                f0_node = unrestricted_ready[0]
+                f1_node = unrestricted_ready[1]
+            elif (f0_node == None):
+                # idx 0 is highest priority value
+                f0_node = unrestricted_ready[0]
+            elif (f1_node == None):
+                # idx 0 is highest priority value
+                f1_node = unrestricted_ready[0]
+            # check we remove everything
+            if (f0_node in ready):
+                ready.remove(f0_node)
+            if (f0_node in unrestricted_ready):
+                unrestricted_ready.remove(f0_node)
+            if (f1_node in ready):
+                ready.remove(f1_node)
+            if (f1_node in unrestricted_ready):
+                unrestricted_ready.remove(f1_node)
+            # return
+            return [f0_node, f1_node]
+                
 
 
-        
-
-        # get highest priority node from ready
-        highest_priority = []
-        first_node_prior = ready[0].priority    # bc sorted
-        for node in ready:
-            node.status = READY
-            if (node.priority == first_node_prior):
-                highest_priority.append(node)
-        
-        if (self.DEBUG_FLAG == True):
-            print("HIGHEST PRIORITY:")
-            self.print_ready(highest_priority)
-            print("READY AFTER:")
-            self.print_ready(ready)
-
-
-
-        # choose for functional unit 0
-        # find first one that can be in unit 0, start by looking for only f0 (load and store)
-        for node in highest_priority:
-            if (node.type == LOAD_OP or node.type == STORE_OP):
-                f0_node = node
-                break
-
-        # if no load or store found, just find operation that isnt mult (aka can go in f0)
-        if (f0_node == None):
-            for node in highest_priority:
-                if (node.type != MULT_OP):
-                    f0_node = node
-                    break
-
-        # if we found an f0 node
-        if (f0_node != None):
-            # remove from list with highest priority nodes
-            highest_priority.remove(f0_node)
-            # remove f0_node from ready
-            ready.remove(f0_node)
-
+        # get highest priority node from unrestricted ready
+        if (len(unrestricted_ready) > 2):
+            highest_priority = []
+            first_node_prior = unrestricted_ready[0].priority    # bc sorted
+            # check if there are multiple of the same priority
+            for node in unrestricted_ready:
+                if (node.priority == first_node_prior):
+                    highest_priority.append(node)
+            
             if (self.DEBUG_FLAG == True):
-                print("HIGHEST PRIORITY AFTER F0NODE:")
+                print("HIGHEST PRIORITY:")
                 self.print_ready(highest_priority)
+                print("READY AFTER:")
+                self.print_ready(ready)
+
+
+            # Find operation for f0
+            if (f0_node == None):
+                for node in highest_priority:
+                    if (node.type != MULT_OP):
+                        f0_node = node
+                        break
+
+            # if we found an f0 node
+            if (f0_node != None):
+                # remove from list with highest priority nodes
+                if (f0_node in highest_priority):
+                    highest_priority.remove(f0_node)
+                # remove f0_node from ready
+                if (f0_node in ready):
+                    ready.remove(f0_node)
+                # remove from unrestricted
+                if (f0_node in unrestricted_ready):
+                    unrestricted_ready.remove(f0_node)
+
+                if (self.DEBUG_FLAG == True):
+                    print("HIGHEST PRIORITY AFTER F0NODE:")
+                    self.print_ready(highest_priority)
+                
+                # output can only have one per cycle
+                if f0_node.type == OUTPUT_OP:
+                    return [f0_node, NOP_OP]
+                
+
+                # if f0 took the only highest priority node, recompute highest priority nodes
+                if (len(highest_priority) == 0):
+                    
+                    if (self.DEBUG_FLAG == True):
+                        print("READY AFTER REMOVE F0NODE:")
+                        self.print_ready(ready)
+                    
+                    # if nothing left in ready, just return
+                    if (len(ready) == 0):
+                        return [f0_node, NOP_OP]
+                    else:
+                        first_node_prior = unrestricted_ready[0].priority    # bc sorted
+                        for node in unrestricted_ready:
+                            if (node.priority == first_node_prior):
+                                highest_priority.append(node)
+            else:
+                # set to nop if we didn't find anything
+                f0_node = NOP_OP
             
-            # output can only have one per cycle
-            if f0_node.type == OUTPUT_OP:
-                return [f0_node, NOP_OP]
+            if (self.DEBUG_FLAG == True):
+                print("HIGHEST PRIORITY B4 f1:")
+                self.print_ready(highest_priority)
+                print("READY B4 f1:")
+                self.print_ready(ready)
             
 
-            # if f0 took the only highest priority node, recompute highest priority nodes
-            if (len(highest_priority) == 0):
-                
-                if (self.DEBUG_FLAG == True):
-                    print("READY AFTER REMOVE F0NODE:")
-                    self.print_ready(ready)
-                
-                # if nothing left in ready, just return
-                if (len(ready) == 0):
-                    return [f0_node, NOP_OP]
-                else:
-                    first_node_prior = ready[0].priority    # bc sorted
-                    for node in ready:
-                        if (node.priority == first_node_prior):
-                            highest_priority.append(node)
-        else:
-            # set to nop if we didn't find anything
+            
+            # Find operation for f1
+            if (f1_node == None):
+                for node in highest_priority:
+                    if (node.type != LOAD_OP and node.type != STORE_OP):
+                        f1_node = node
+                        break
+            
+            # if we didnt find an f1 node
+            if (f1_node == None):
+                # set to nop if we didn't find anything
+                f1_node = NOP_OP
+            else:   # if we found an f1 node
+                if (f1_node in ready):
+                    ready.remove(f1_node)
+                if (f1_node in unrestricted_ready):
+                    unrestricted_ready.remove(f1_node)
+                if (f1_node in highest_priority):
+                    highest_priority.remove(f1_node)
+            
+        # double check that neither are None
+        if (f0_node == None):
             f0_node = NOP_OP
-        
-        if (self.DEBUG_FLAG == True):
-            print("HIGHEST PRIORITY B4 f1:")
-            self.print_ready(highest_priority)
-            print("READY B4 f1:")
-            self.print_ready(ready)
-        
-        # choose for functional unit 1
-        # find first one that can be in unit 1, start by looking for only f1 (mult)
-        for node in highest_priority:
-            if (node.type == MULT_OP):
-                f1_node = node
-                break
-        
-        # if no mult found, just find operation that can go in f1 (not load or store)
         if (f1_node == None):
-            for node in highest_priority:
-                if (node.type != LOAD_OP and node.type != STORE_OP):
-                    f1_node = node
-                    break
-        
-        # if we found an f0 node
-        if (f1_node == None):
-            # set to nop if we didn't find anything
             f1_node = NOP_OP
-        else:
-            ready.remove(f1_node)
-        
         ret = [f0_node, f1_node]
         if (self.DEBUG_FLAG == True):
             print("RETURN VALUE:")
@@ -494,7 +572,12 @@ class Lab3:
             if (self.DEBUG_FLAG == True): print("CYCLE: " + str(cycle))
             # Pick an operation, o, for each functional unit
             ops = self.get_operations_for_units(ready)
+            
             if (self.DEBUG_FLAG == True):
+                print(len(ops))
+                print("OPS:")
+                print(ops)
+
                 self.print_ready(ready)
                 self.print_active(active)
             f0_op = ops[F0]

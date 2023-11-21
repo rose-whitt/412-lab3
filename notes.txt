@@ -1,3 +1,9 @@
+
+
+
+./lab3/scripts/test ./schedule ./lab3/report
+
+
 run reference to get scheduled code: ~comp412/students/lab3/lab3_ref -s -g ./dgslide4.i >> scheduled_dgslide4_ref.i
 run the scheduled code against simulator: ./lab3/sim -t -s 1 ./scheduled_dgslide4_ref.i >> sim_scheduled_dgslide4.i
 run the original (not scheduled) code against simulator: ./lab3/sim -t -s 3 ./dgslide4.i >> sim_notscheduled_dgslide.i
