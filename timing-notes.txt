@@ -1,0 +1,67 @@
+
+./schedule ./ILOC/Scalability/SLOCs/T008k.i
+
+
+963408 function calls in 5.315 seconds
+
+   Ordered by: cumulative time
+
+   ncalls  tottime  percall  cumtime  percall filename:lineno(function)
+        1    4.768    4.768    4.875    4.875 lab3.py:85(build_graph)
+        1    0.000    0.000    0.217    0.217 lab3.py:711(main_schedule)
+        1    0.000    0.000    0.197    0.197 /storage-home/r/rew9/comp412/412-lab3/lab2.py:54(__init__)
+        1    0.000    0.000    0.197    0.197 /storage-home/r/rew9/comp412/412-lab3/lab1.py:384(main)
+        1    0.051    0.051    0.197    0.197 /storage-home/r/rew9/comp412/412-lab3/lab1.py:24(run)
+        1    0.028    0.028    0.113    0.113 lab3.py:553(schedule_algo)
+        1    0.006    0.006    0.104    0.104 lab3.py:683(print_schedule)
+        1    0.083    0.083    0.083    0.083 {built-in method builtins.print}
+   100187    0.071    0.000    0.073    0.000 /storage-home/r/rew9/comp412/412-lab3/scanner.py:127(get_token)
+     4006    0.054    0.000    0.063    0.000 lab3.py:275(get_operations_for_units)
+     8001    0.047    0.000    0.063    0.000 /storage-home/r/rew9/comp412/412-lab3/scanner.py:89(convert_line_to_ascii_list)
+     8000    0.026    0.000    0.038    0.000 /storage-home/r/rew9/comp412/412-lab3/DP_MAP.py:264(add_data_edge)
+     8000    0.014    0.000    0.029    0.000 /storage-home/r/rew9/comp412/412-lab3/DP_MAP.py:168(add_node)
+        1    0.013    0.013    0.025    0.025 /storage-home/r/rew9/comp412/412-lab3/lab2.py:504(rename)
+        1    0.017    0.017    0.023    0.023 lab3.py:242(set_priorities)
+   355043    0.020    0.000    0.020    0.000 {method 'append' of 'list' objects}
+     4007    0.012    0.000    0.018    0.000 {built-in method builtins.sorted}
+     8000    0.015    0.000    0.015    0.000 /storage-home/r/rew9/comp412/412-lab3/DP_MAP.py:83(__init__)
+     8000    0.015    0.000    0.015    0.000 /storage-home/r/rew9/comp412/412-lab3/DP_MAP.py:341(get_ir_node)
+    15993    0.011    0.000    0.011    0.000 /storage-home/r/rew9/comp412/412-lab3/DP_MAP.py:51(__init__)
+    15992    0.008    0.000    0.008    0.000 /storage-home/r/rew9/comp412/412-lab3/lab2.py:382(op_uses)
+        1    0.006    0.006    0.008    0.008 lab3.py:215(convert_edge_map)
+   148495    0.007    0.000    0.007    0.000 {built-in method builtins.ord}
+        1    0.006    0.006    0.006    0.006 /storage-home/r/rew9/comp412/412-lab3/DP_MAP.py:480(graph_consistency_checker)
+    75394    0.006    0.000    0.006    0.000 lab3.py:570(<lambda>)
+     8000    0.005    0.000    0.005    0.000 /storage-home/r/rew9/comp412/412-lab3/IR_List.py:39(__init__)
+     7998    0.004    0.000    0.004    0.000 /storage-home/r/rew9/comp412/412-lab3/lab2.py:364(op_defines)
+     8000    0.004    0.000    0.004    0.000 /storage-home/r/rew9/comp412/412-lab3/IR_List.py:113(append)
+        1    0.002    0.002    0.003    0.003 /storage-home/r/rew9/comp412/412-lab3/DP_MAP.py:366(identify_roots_and_leaves)
+    15994    0.003    0.000    0.003    0.000 {built-in method builtins.max}
+    31990    0.002    0.000    0.002    0.000 {method 'remove' of 'list' objects}
+    44228    0.002    0.000    0.002    0.000 {built-in method builtins.len}
+    31995    0.002    0.000    0.002    0.000 {method 'items' of 'dict' objects}
+     8001    0.002    0.000    0.002    0.000 {method 'readline' of '_io.TextIOWrapper' objects}
+    15994    0.002    0.000    0.002    0.000 {method 'get' of 'dict' objects}
+     8000    0.001    0.000    0.001    0.000 {method 'index' of 'list' objects}
+        1    0.001    0.001    0.001    0.001 lab3.py:222(<dictcomp>)
+    15994    0.001    0.000    0.001    0.000 {method 'pop' of 'list' objects}
+     8001    0.001    0.000    0.001    0.000 {method 'values' of 'dict' objects}
+        1    0.000    0.000    0.000    0.000 {method 'close' of '_io.TextIOWrapper' objects}
+        1    0.000    0.000    0.000    0.000 {built-in method io.open}
+       21    0.000    0.000    0.000    0.000 /usr/lib64/python3.6/codecs.py:318(decode)
+       21    0.000    0.000    0.000    0.000 {built-in method _codecs.utf_8_decode}
+        1    0.000    0.000    0.000    0.000 lab3.py:66(__init__)
+        1    0.000    0.000    0.000    0.000 /storage-home/r/rew9/comp412/412-lab3/scanner.py:53(__init__)
+        1    0.000    0.000    0.000    0.000 /usr/lib64/python3.6/_bootlocale.py:23(getpreferredencoding)
+        1    0.000    0.000    0.000    0.000 /usr/lib64/python3.6/codecs.py:308(__init__)
+        1    0.000    0.000    0.000    0.000 /storage-home/r/rew9/comp412/412-lab3/DP_MAP.py:219(add_conflict_edge)
+        1    0.000    0.000    0.000    0.000 /storage-home/r/rew9/comp412/412-lab3/DP_MAP.py:152(__init__)
+        1    0.000    0.000    0.000    0.000 /storage-home/r/rew9/comp412/412-lab3/lab1.py:15(__init__)
+        1    0.000    0.000    0.000    0.000 /storage-home/r/rew9/comp412/412-lab3/IR_List.py:106(__init__)
+        1    0.000    0.000    0.000    0.000 {built-in method _locale.nl_langinfo}
+       21    0.000    0.000    0.000    0.000 /usr/lib64/python3.6/codecs.py:330(getstate)
+        1    0.000    0.000    0.000    0.000 /storage-home/r/rew9/comp412/412-lab3/lab2.py:506(<listcomp>)
+        1    0.000    0.000    0.000    0.000 /storage-home/r/rew9/comp412/412-lab3/lab2.py:507(<listcomp>)
+        1    0.000    0.000    0.000    0.000 /usr/lib64/python3.6/codecs.py:259(__init__)
+        1    0.000    0.000    0.000    0.000 {method 'disable' of '_lsprof.Profiler' objects}
+        3    0.000    0.000    0.000    0.000 lab3.py:558(<lambda>)

@@ -1,5 +1,6 @@
 
 
+./schedule ./ILOC/Scalability/SLOCs/T008k.i
 
 ./lab3/scripts/test ./schedule ./lab3/report
 
