@@ -82,6 +82,11 @@ class Lab3:
         self.schedule = {F0: {}, F1: {}}    
         self.num_nodes = 0
 
+        ####################### NEW DEPENDENCE GRAPH IMP #######################
+        # Node format [IDX, op IDX, Full OP, PRED, SUCC, Delay, Priority, Status]
+
+        #Edge format lidx, from, to, pred, succ, latency,
+
     def build_graph(self):
         # print("WASSUP BITCH")
         start = self.IR_LIST.head
