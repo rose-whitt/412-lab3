@@ -59,6 +59,36 @@ ACTIVE = 3
 RETIRED = 4
 
 
+# NODE LIST ELEMENT FORMAT
+IDX_NODE = 0
+LINE_NUM_NODE = 1
+FULL_OP_NODE = 2 # (like loadI 12 => r1)
+TYPE_NODE = 3   # opcode
+DELAY_NODE = 4
+ROOT_BOOL_NODE = 5
+LEAF_BOOL_NODE = 6
+INTO_EDGES_MAP_NODE = 7    # idx of parent mapped to idx of edge between this node and parent edges going into the node, list of integers where integer is idx in edges list
+OUTOF_EDGES_MAP_NODE = 8   # idx of child mapped to idx of edge between this node and child ; edges going out of the node, list of integers where integer is idx in edges list
+STATUS_NODE = 9
+IR_ARG1_NODE = 10   # [sr, vr, pr, nu]
+IR_ARG2_NODE = 11   # [sr, vr, pr, nu]
+IR_ARG3_NODE = 12   # [sr, vr, pr, nu]
+
+# EDGE LIST ELEMENT FORMAT
+IDX_EDGE = 0
+KIND_EDGE = 1
+LATENCY_EDGE = 2
+VR_EDGE = 3 # only defined if kind is Data
+PARENT_IDX = 4 # index of parent node in the nodes list
+OUTOF_LINE_NUM_EDGE = 5 # line num of parent node
+CHILD_IDX = 6   # index of child node in nodes list
+INTO_LINE_NUM_EDGE = 7  # line num of child node
+
+
+
+
+
+
 class Lab3:
     """
     
@@ -84,16 +114,97 @@ class Lab3:
         self.num_nodes = 0
 
         ####################### NEW DEPENDENCE GRAPH IMP #######################
-        # Node format [line num, IDX, op IDX, Full OP (like loadI 12 => r1), PRED (previous), SUCC (next), Delay, Priority, Status]
-        nodes_list = []
-        # Edge format [idx, from (index of node it is coming out of), to (index of node that it is going into), latency, type]
-        edges_list = []
+        self.VR_TO_NODE = {}    # vr to index of node in nodes list
+        # Node format [IDX, line num, Full OP, type, delay, root boolean, leaf boolean, into edges list (index in edges list), out of edges list (index in edges list), status, ir list arg1, ir list arg2, ir list arg3]
+        self.nodes_list = []
+        # Edge format [IDX, kind, latency, VR, parent idx, out of line num (line num of parent node), child idx, into line num (line num of child node)]
+        self.edges_list = []
         # child to parent list format: idx = child node index in nodes_list, element list of indices of parents
-        child_to_parents = []
+        self.child_to_parents = []
         # parent to child list format: idx = parent node index in nodes_list, element list of indices of children
-        parent_to_children = []
+        self.parent_to_children = []
 
+    
+    def build_new_graph(self):
+        """
+            New graph implementation
+        """
+        # print("WASSUP BITCH")
+        start = self.IR_LIST.head
+        while (start != None):
+            # creates node for o
+            # if o defines vri, sets vr_to_node[vri] = node
+            tmp_node = self.add_node(start)  # always adds node
+            # for each vrj used in o, add an edge from o to the node in M(vrj)
+            self.DP_MAP.add_data_edge(tmp_node) # doesnt always add edge, conditions to add are in function
+
+            # if o is a load, store or output operation, add edges to ensure serialization of memory ops
+            # variables to make sure we only add the most recent one
+            OUTPUT_OUTPUT = False   # parent = output, child = output, serial
+            STORE_WAW = False   # parent = store, child = store, serial
+            # WAR IS ALL READS SINCE LAST STORE, NOT JUST THE MOST RECENT READ
+            LAST_STORE = -1
+            # LOAD_WAR = False    # parent = store, child = load, serial
+            # OUTPUT_WAR = False  # parent = store, child = output, serial
+
+            LOAD_RAW = False    # parent = load, child = store, conflict
+            OUTPUT_RAW = False  # parent = output, child = store, conflict
+
+            tmp_node_list = list(self.DP_MAP.nodes_map.values())
+            # reverse so it starts from most recent node to farthest away node
+            for other_node in reversed(tmp_node_list):
+                
+
+                # serial and conflict edges
+                if (start.opcode == LOAD_OP or start.opcode == STORE_OP or start.opcode == OUTPUT_OP):
+                    # TODO: load to load, no edge needed
+
+                    # either output to output (serial) or output to store (conflict)
+                    if (tmp_node.type == OUTPUT_OP):
+                        if (other_node.type == OUTPUT_OP and other_node != tmp_node and OUTPUT_OUTPUT == False):   # TODO: maybe OUTPUT_WAR variable so its the most recent output?
+                            self.DP_MAP.add_serial_edge(tmp_node, other_node)
+                            OUTPUT_OUTPUT = True
+                        if (other_node.type == STORE_OP and OUTPUT_RAW == False):
+                            self.DP_MAP.add_conflict_edge(tmp_node, other_node)
+                            OUTPUT_RAW = True   # only go to most recent store
+                    elif (tmp_node.type == STORE_OP):
+                        if (other_node.type == STORE_OP and other_node != tmp_node and STORE_WAW == False):
+                            self.DP_MAP.add_serial_edge(tmp_node, other_node)
+                            STORE_WAW = True
+                        if (other_node.type == LOAD_OP and self.check_for_edge(tmp_node, other_node) == False):
+                            self.DP_MAP.add_serial_edge(tmp_node, other_node)
+                        if (other_node.type == OUTPUT_OP):
+                            self.DP_MAP.add_serial_edge(tmp_node, other_node)
+                    elif (tmp_node.type == LOAD_OP):
+                        if (other_node.type == STORE_OP and LOAD_RAW == False):
+                            self.DP_MAP.add_conflict_edge(tmp_node, other_node)
+                            LOAD_RAW = True
+
+            start = start.next
+
+        cunt = self.DP_MAP.identify_roots_and_leaves()
+        self.roots = cunt[0]
+        self.leaves = cunt[1]
         
+
+        # print(self.DP_MAP.edge_list)
+        # print(len(self.DP_MAP.edge_list))
+
+        self.convert_edge_map()
+        if (self.DEBUG_FLAG == True): self.print_edge_map()
+
+        for root in self.roots:
+            self.set_priorities(root)
+        
+        if (self.DEBUG_FLAG == True or self.GRAPH_ONLY == True):
+            self.DP_MAP.print_dot()
+        # self.DP_MAP.print_dot()
+
+        if (self.DEBUG_FLAG == True):
+            self.DP_MAP.print_vrtonode()
+        self.DP_MAP.graph_consistency_checker()
+        if (self.DEBUG_FLAG == True): print("// num roots: " + str(len(self.roots)))
+        if (self.DEBUG_FLAG == True): print("// num leaves: " + str(len(self.leaves)))
 
     def build_graph(self):
         # print("WASSUP BITCH")
@@ -163,7 +274,8 @@ class Lab3:
         for root in self.roots:
             self.set_priorities(root)
         
-        if (self.DEBUG_FLAG == True): self.DP_MAP.print_dot()
+        if (self.DEBUG_FLAG == True or self.GRAPH_ONLY == True):
+            self.DP_MAP.print_dot()
         # self.DP_MAP.print_dot()
 
         if (self.DEBUG_FLAG == True):
@@ -776,6 +888,177 @@ class Lab3:
                 tmp += " "
         tmp += "]"
         print(tmp)
+    
+
+    # 🏳️‍🌈🏳️‍🌈🏳️‍🌈🏳️‍🌈🏳️‍🌈🏳️‍🌈🏳️‍🌈🏳️‍🌈🏳️‍🌈🏳️‍🌈🏳️‍🌈🏳️‍🌈🏳️‍🌈 NEW DEPENDENCE GRAPH 🏳️‍🌈🏳️‍🌈🏳️‍🌈🏳️‍🌈🏳️‍🌈🏳️‍🌈🏳️‍🌈🏳️‍🌈🏳️‍🌈🏳️‍🌈🏳️‍🌈🏳️‍🌈🏳️‍🌈
+    
+    def add_node(self, ir_node):
+        """
+            Given an ir node object, make a node and add to nodes list
+            Node format:
+              [IDX, line num, Full OP, type, delay, root boolean, leaf boolean, into edges list, out of edges list, status, arg1, arg2, arg3]
+
+        """
+        # 1) Make node
+        node = []
+        node[IDX_NODE] = len(self.nodes_list) - 1   # 0
+        node[LINE_NUM_NODE] = ir_node.line  # 1
+        node[FULL_OP_NODE] = self.get_full_op(ir_node)  # 2
+        node[TYPE_NODE] = ir_node.opcode    # 3
+        if (node[TYPE_NODE] == LOAD_OP):
+            node[DELAY_NODE] = LOAD_LATENCY # 4
+        elif (node[TYPE_NODE] == LOADI_OP):
+            node[DELAY_NODE] = LOADI_LATENCY
+        elif (node[TYPE_NODE] == STORE_OP):
+            node[DELAY_NODE] = STORE_LATENCY
+        elif (node[TYPE_NODE] == ADD_OP):
+            node[DELAY_NODE] = ADD_LATENCY
+        elif (node[TYPE_NODE] == ADD_OP):
+            node[DELAY_NODE] = ADD_LATENCY
+        elif (node[TYPE_NODE] == SUB_OP):
+            node[DELAY_NODE] = SUB_LATENCY
+        elif (node[TYPE_NODE] == MULT_OP):
+            node[DELAY_NODE] = MULT_LATENCY
+        elif (node[TYPE_NODE] == LSHIFT_OP):
+            node[DELAY_NODE] = LSHIFT_LATENCY
+        elif (node[TYPE_NODE] == RSHIFT_OP):
+            node[DELAY_NODE] = RSHIFT_LATENCY
+        elif (node[TYPE_NODE] == OUTPUT_OP):
+            node[DELAY_NODE] = OUTPUT_LATENCY
+        elif (node[TYPE_NODE] == NOP_OP): # shouldnt happen but added just in case
+            node[DELAY_NODE] = NOP_LATENCY
+        node[ROOT_BOOL_NODE] = None # 5 ; dont know until later
+        node[LEAF_BOOL_NODE] = None # 6 ; dont know until later
+        node[INTO_EDGES_MAP_NODE] = [] # 7
+        node[OUTOF_EDGES_MAP_NODE] = []    # 8
+        node[STATUS_NODE] = NOT_READY   # 9
+        node[IR_ARG1_NODE] = ir_node.arg1   # 10
+        node[IR_ARG2_NODE] = ir_node.arg2   # 11
+        node[IR_ARG3_NODE] = ir_node.arg3   # 12
+
+        # 2) Add to vr to node mapping but only when it defines
+        vr = ir_node.arg3[1]
+        if (vr not in self.VR_TO_NODE and vr != None):  # first time
+            self.VR_TO_NODE[vr] = node[IDX_NODE]
+        
+        # 3) Add to nodes list
+        self.nodes_list.append(node)
+        
+        # 4) return the node
+        return node
+
+    def add_data_edge(self, node):
+        """
+            Given a node in the graph, add a data edge
+            for each VRj used in o, add an edge from o to the node in M(VRj)
+            Edge format:
+            [IDX, kind, latency, VR, parent idx, out of line num, child idx, into line num]
+        """
+        if (node[IR_ARG1_NODE][1] != None):
+            into_node_idx = self.VR_TO_NODE[node[IR_ARG1_NODE[1]]]
+            into_node = self.nodes_list[into_node_idx]
+            # print('ARG1 INTO NODE: ')
+            # self.print_node(into_node)
+            # make the edge
+            edge = []
+            edge[IDX_EDGE] = len(self.edges_list) - 1   # 0
+            edge[KIND_EDGE] = DATA  # 1
+            edge[LATENCY_EDGE] = into_node[DELAY_NODE]   # 2 ; latency of the edge is the delay of the first operation (into_node)
+            edge[VR_EDGE] = node[IR_ARG1_NODE][1]  # 3
+            edge[PARENT_IDX] = node[IDX_NODE]  # 4
+            edge[OUTOF_LINE_NUM_EDGE] = node[LINE_NUM_NODE]
+            edge[CHILD_IDX] = into_node[IDX_NODE]
+            edge[INTO_EDGES_MAP_NODE] = into_node[LINE_NUM_NODE]
+
+            # add the edge to the out of map
+            node[OUTOF_EDGES_MAP_NODE][into_node[IDX_NODE]] = edge[IDX_EDGE]
+            # add edge to child's into map
+            into_node[INTO_EDGES_MAP_NODE][node[IDX_NODE]] = edge[IDX_EDGE]
+            # add to edges list
+            self.edges_list.append(edge)
+
+
+        # arg2
+        
+        if (node[IR_ARG2_NODE][1] != None):
+            into_node_idx = self.VR_TO_NODE[node[IR_ARG2_NODE[1]]]
+            into_node = self.nodes_list[into_node_idx]
+            # print('ARG2 INTO NODE: ')
+            # self.print_node(into_node)
+            # make the edge
+            edge = []
+            edge[IDX_EDGE] = len(self.edges_list) - 1   # 0
+            edge[KIND_EDGE] = DATA  # 1
+            edge[LATENCY_EDGE] = into_node[DELAY_NODE]    # latency of the edge is the delay of the first operation (into_node)
+            edge[VR_EDGE] = node[IR_ARG2_NODE][1]  # 3
+            edge[PARENT_IDX] = node[IDX_NODE]
+            edge[OUTOF_LINE_NUM_EDGE] = node[LINE_NUM_NODE]
+            edge[CHILD_IDX] = into_node[IDX_NODE]
+            edge[INTO_EDGES_MAP_NODE] = into_node[LINE_NUM_NODE]
+
+            # add the edge to the out of map
+            node[OUTOF_EDGES_MAP_NODE][into_node[IDX_NODE]] = edge[IDX_EDGE]
+            # add edge to child's into map
+            into_node[INTO_EDGES_MAP_NODE][node[IDX_NODE]] = edge[IDX_EDGE]
+            # add to edges list
+            self.edges_list.append(edge)
+
+        
+        if (node[IR_ARG3_NODE][1] != None and node[TYPE_NODE] == STORE_OP):
+            into_node_idx = self.VR_TO_NODE[node[IR_ARG3_NODE[1]]]
+            into_node = self.nodes_list[into_node_idx]
+            # print('ARG3 INTO NODE: ')
+            # self.print_node(into_node)
+            # make the edge
+            edge = []
+            edge[IDX_EDGE] = len(self.edges_list) - 1   # 0
+            edge[KIND_EDGE] = DATA  # 1
+            edge[LATENCY_EDGE] = into_node[DELAY_NODE]    # latency of the edge is the delay of the first operation (into_node)
+            edge[VR_EDGE] = node[IR_ARG3_NODE][1]  # 3
+            edge[PARENT_IDX] = node[IDX_NODE]
+            edge[OUTOF_LINE_NUM_EDGE] = node[LINE_NUM_NODE]
+            edge[CHILD_IDX] = into_node[IDX_NODE]
+            edge[INTO_EDGES_MAP_NODE] = into_node[LINE_NUM_NODE]
+
+            # add the edge to the out of map
+            node[OUTOF_EDGES_MAP_NODE][into_node[IDX_NODE]] = edge[IDX_EDGE]
+            # add edge to child's into map
+            into_node[INTO_EDGES_MAP_NODE][node[IDX_NODE]] = edge[IDX_EDGE]
+            # add to edges list
+            self.edges_list.append(edge)
+         
+         
+        
+
+
+    def get_full_op(self, node):
+        """
+            Given an IR node, returns the IR string representation
+        """
+        lh = ""
+        rh = ""
+        
+        if (node.opcode == 0 or node.opcode == 1): # MEMOP
+            lh = "r" + str(node.arg1[VR_IDX])
+        elif (node.opcode == 2): # LOADI
+            lh = str(node.arg1[SR_IDX])
+        elif (node.opcode >= 3 and node.opcode <= 7):  # ARITHOP
+            lh = "r" + str(node.arg1[VR_IDX]) + ",r" + str(node.arg2[VR_IDX]) 
+        elif (node.opcode == 8): # OUTPUT
+            lh = str(node.arg1[SR_IDX])
+        
+        if (node.opcode != 8):
+            rh = "=> r" + str(node.arg3[VR_IDX])
+
+        opcode = self.opcodes_list[node.opcode] + " "
+
+        temp = opcode + lh + " " + rh
+        return temp
+
+
+
+
+    # 🏳️‍🌈🏳️‍🌈🏳️‍🌈🏳️‍🌈🏳️‍🌈🏳️‍🌈🏳️‍🌈🏳️‍🌈🏳️‍🌈🏳️‍🌈🏳️‍🌈🏳️‍🌈🏳️‍🌈🏳️‍🌈🏳️‍🌈🏳️‍🌈🏳️‍🌈🏳️‍🌈🏳️‍🌈🏳️‍🌈🏳️‍🌈🏳️‍🌈🏳️‍🌈🏳️‍🌈🏳️‍🌈🏳️‍🌈🏳️‍🌈🏳️‍🌈🏳️‍🌈🏳️‍🌈🏳️‍🌈🏳️‍🌈🏳️‍🌈🏳️‍🌈🏳️‍🌈🏳️‍🌈🏳️‍🌈🏳️‍🌈🏳️‍🌈
 
        
 
@@ -837,13 +1120,14 @@ def main():
             DEBUG_FLAG = True
         
         if (sys.argv[1] == '-g'):
-            GRAPH_ONLY
+            GRAPH_ONLY = True
 
 
         
         Lab_3 = Lab3(Lab_2.IR_LIST, DEBUG_FLAG, GRAPH_ONLY)
         Lab_3.build_graph()
-        Lab_3.main_schedule()
+        if (GRAPH_ONLY == False):
+            Lab_3.main_schedule()
     
     # pr.disable()
     # s = StringIO()
