@@ -73,15 +73,16 @@ STATUS_NODE = 9
 IR_ARG1_NODE = 10   # [sr, vr, pr, nu]
 IR_ARG2_NODE = 11   # [sr, vr, pr, nu]
 IR_ARG3_NODE = 12   # [sr, vr, pr, nu]
+PRIORITY_NODE = 13
 
 # EDGE LIST ELEMENT FORMAT
 IDX_EDGE = 0
 KIND_EDGE = 1
 LATENCY_EDGE = 2
 VR_EDGE = 3 # only defined if kind is Data
-PARENT_IDX = 4 # index of parent node in the nodes list
+PARENT_IDX_EDGE = 4 # index of parent node in the nodes list
 OUTOF_LINE_NUM_EDGE = 5 # line num of parent node
-CHILD_IDX = 6   # index of child node in nodes list
+CHILD_IDX_EDGE = 6   # index of child node in nodes list
 INTO_LINE_NUM_EDGE = 7  # line num of child node
 
 
@@ -115,7 +116,7 @@ class Lab3:
 
         ####################### NEW DEPENDENCE GRAPH IMP #######################
         self.VR_TO_NODE = {}    # vr to index of node in nodes list
-        # Node format [IDX, line num, Full OP, type, delay, root boolean, leaf boolean, into edges list (index in edges list), out of edges list (index in edges list), status, ir list arg1, ir list arg2, ir list arg3]
+        # Node format [IDX, line num, Full OP, type, delay, root boolean, leaf boolean, into edges list (index in edges list), out of edges list (index in edges list), status, ir list arg1, ir list arg2, ir list arg3, priority]
         self.nodes_list = []
         # Edge format [IDX, kind, latency, VR, parent idx, out of line num (line num of parent node), child idx, into line num (line num of child node)]
         self.edges_list = []
@@ -136,7 +137,7 @@ class Lab3:
             # if o defines vri, sets vr_to_node[vri] = node
             tmp_node = self.add_node(start)  # always adds node
             # for each vrj used in o, add an edge from o to the node in M(vrj)
-            self.DP_MAP.add_data_edge(tmp_node) # doesnt always add edge, conditions to add are in function
+            self.add_data_edge(tmp_node) # doesnt always add edge, conditions to add are in function
 
             # if o is a load, store or output operation, add edges to ensure serialization of memory ops
             # variables to make sure we only add the most recent one
@@ -150,7 +151,7 @@ class Lab3:
             LOAD_RAW = False    # parent = load, child = store, conflict
             OUTPUT_RAW = False  # parent = output, child = store, conflict
 
-            tmp_node_list = list(self.DP_MAP.nodes_map.values())
+            tmp_node_list = list(self.nodes_list)
             # reverse so it starts from most recent node to farthest away node
             for other_node in reversed(tmp_node_list):
                 
@@ -160,49 +161,43 @@ class Lab3:
                     # TODO: load to load, no edge needed
 
                     # either output to output (serial) or output to store (conflict)
-                    if (tmp_node.type == OUTPUT_OP):
-                        if (other_node.type == OUTPUT_OP and other_node != tmp_node and OUTPUT_OUTPUT == False):   # TODO: maybe OUTPUT_WAR variable so its the most recent output?
-                            self.DP_MAP.add_serial_edge(tmp_node, other_node)
+                    if (tmp_node[TYPE_NODE] == OUTPUT_OP):
+                        if (other_node[TYPE_NODE] == OUTPUT_OP and other_node != tmp_node and OUTPUT_OUTPUT == False):   # TODO: maybe OUTPUT_WAR variable so its the most recent output?
+                            self.add_serial_edge(tmp_node, other_node)
                             OUTPUT_OUTPUT = True
-                        if (other_node.type == STORE_OP and OUTPUT_RAW == False):
-                            self.DP_MAP.add_conflict_edge(tmp_node, other_node)
+                        if (other_node[TYPE_NODE] == STORE_OP and OUTPUT_RAW == False):
+                            self.add_conflict_edge(tmp_node, other_node)
                             OUTPUT_RAW = True   # only go to most recent store
-                    elif (tmp_node.type == STORE_OP):
-                        if (other_node.type == STORE_OP and other_node != tmp_node and STORE_WAW == False):
-                            self.DP_MAP.add_serial_edge(tmp_node, other_node)
+                    elif (tmp_node[TYPE_NODE] == STORE_OP):
+                        if (other_node[TYPE_NODE] == STORE_OP and other_node != tmp_node and STORE_WAW == False):
+                            self.add_serial_edge(tmp_node, other_node)
                             STORE_WAW = True
-                        if (other_node.type == LOAD_OP and self.check_for_edge(tmp_node, other_node) == False):
-                            self.DP_MAP.add_serial_edge(tmp_node, other_node)
-                        if (other_node.type == OUTPUT_OP):
-                            self.DP_MAP.add_serial_edge(tmp_node, other_node)
-                    elif (tmp_node.type == LOAD_OP):
-                        if (other_node.type == STORE_OP and LOAD_RAW == False):
-                            self.DP_MAP.add_conflict_edge(tmp_node, other_node)
+                        if (other_node[TYPE_NODE] == LOAD_OP and self.check_for_edge(tmp_node, other_node) == False):
+                            self.add_serial_edge(tmp_node, other_node)
+                        if (other_node[TYPE_NODE] == OUTPUT_OP):
+                            self.add_serial_edge(tmp_node, other_node)
+                    elif (tmp_node[TYPE_NODE] == LOAD_OP):
+                        if (other_node[TYPE_NODE] == STORE_OP and LOAD_RAW == False):
+                            self.add_conflict_edge(tmp_node, other_node)
                             LOAD_RAW = True
 
             start = start.next
 
-        cunt = self.DP_MAP.identify_roots_and_leaves()
-        self.roots = cunt[0]
-        self.leaves = cunt[1]
+        self.identify_roots_and_leaves()
         
-
-        # print(self.DP_MAP.edge_list)
-        # print(len(self.DP_MAP.edge_list))
-
-        self.convert_edge_map()
-        if (self.DEBUG_FLAG == True): self.print_edge_map()
+        self.NEW_convert_edge_map()
+        if (self.DEBUG_FLAG == True): self.NEW_print_edge_map()
 
         for root in self.roots:
-            self.set_priorities(root)
+            self.NEW_set_priorities(root)
         
         if (self.DEBUG_FLAG == True or self.GRAPH_ONLY == True):
-            self.DP_MAP.print_dot()
+            self.print_dot()
         # self.DP_MAP.print_dot()
 
-        if (self.DEBUG_FLAG == True):
-            self.DP_MAP.print_vrtonode()
-        self.DP_MAP.graph_consistency_checker()
+        # if (self.DEBUG_FLAG == True):
+        #     self.DP_MAP.print_vrtonode()
+        self.graph_consistency_checker()
         if (self.DEBUG_FLAG == True): print("// num roots: " + str(len(self.roots)))
         if (self.DEBUG_FLAG == True): print("// num leaves: " + str(len(self.leaves)))
 
@@ -896,11 +891,11 @@ class Lab3:
         """
             Given an ir node object, make a node and add to nodes list
             Node format:
-              [IDX, line num, Full OP, type, delay, root boolean, leaf boolean, into edges list, out of edges list, status, arg1, arg2, arg3]
+              [IDX, line num, Full OP, type, delay, root boolean, leaf boolean, into edges list, out of edges list, status, arg1, arg2, arg3, priority]
 
         """
         # 1) Make node
-        node = []
+        node = [0] * 14
         node[IDX_NODE] = len(self.nodes_list) - 1   # 0
         node[LINE_NUM_NODE] = ir_node.line  # 1
         node[FULL_OP_NODE] = self.get_full_op(ir_node)  # 2
@@ -927,14 +922,15 @@ class Lab3:
             node[DELAY_NODE] = OUTPUT_LATENCY
         elif (node[TYPE_NODE] == NOP_OP): # shouldnt happen but added just in case
             node[DELAY_NODE] = NOP_LATENCY
-        node[ROOT_BOOL_NODE] = None # 5 ; dont know until later
-        node[LEAF_BOOL_NODE] = None # 6 ; dont know until later
-        node[INTO_EDGES_MAP_NODE] = [] # 7
-        node[OUTOF_EDGES_MAP_NODE] = []    # 8
+        node[ROOT_BOOL_NODE] = False # 5 ; dont know until later
+        node[LEAF_BOOL_NODE] = False # 6 ; dont know until later
+        node[INTO_EDGES_MAP_NODE] = {} # 7
+        node[OUTOF_EDGES_MAP_NODE] = {}    # 8
         node[STATUS_NODE] = NOT_READY   # 9
         node[IR_ARG1_NODE] = ir_node.arg1   # 10
         node[IR_ARG2_NODE] = ir_node.arg2   # 11
         node[IR_ARG3_NODE] = ir_node.arg3   # 12
+        node[PRIORITY_NODE] = 0 # 13
 
         # 2) Add to vr to node mapping but only when it defines
         vr = ir_node.arg3[1]
@@ -960,15 +956,15 @@ class Lab3:
             # print('ARG1 INTO NODE: ')
             # self.print_node(into_node)
             # make the edge
-            edge = []
+            edge = [0] * 8
             edge[IDX_EDGE] = len(self.edges_list) - 1   # 0
             edge[KIND_EDGE] = DATA  # 1
             edge[LATENCY_EDGE] = into_node[DELAY_NODE]   # 2 ; latency of the edge is the delay of the first operation (into_node)
             edge[VR_EDGE] = node[IR_ARG1_NODE][1]  # 3
-            edge[PARENT_IDX] = node[IDX_NODE]  # 4
+            edge[PARENT_IDX_EDGE] = node[IDX_NODE]  # 4
             edge[OUTOF_LINE_NUM_EDGE] = node[LINE_NUM_NODE]
-            edge[CHILD_IDX] = into_node[IDX_NODE]
-            edge[INTO_EDGES_MAP_NODE] = into_node[LINE_NUM_NODE]
+            edge[CHILD_IDX_EDGE] = into_node[IDX_NODE]
+            edge[INTO_LINE_NUM_EDGE] = into_node[LINE_NUM_NODE]
 
             # add the edge to the out of map
             node[OUTOF_EDGES_MAP_NODE][into_node[IDX_NODE]] = edge[IDX_EDGE]
@@ -986,15 +982,16 @@ class Lab3:
             # print('ARG2 INTO NODE: ')
             # self.print_node(into_node)
             # make the edge
-            edge = []
+            edge = [0] * 8
             edge[IDX_EDGE] = len(self.edges_list) - 1   # 0
             edge[KIND_EDGE] = DATA  # 1
             edge[LATENCY_EDGE] = into_node[DELAY_NODE]    # latency of the edge is the delay of the first operation (into_node)
             edge[VR_EDGE] = node[IR_ARG2_NODE][1]  # 3
-            edge[PARENT_IDX] = node[IDX_NODE]
+            edge[PARENT_IDX_EDGE] = node[IDX_NODE]
             edge[OUTOF_LINE_NUM_EDGE] = node[LINE_NUM_NODE]
-            edge[CHILD_IDX] = into_node[IDX_NODE]
-            edge[INTO_EDGES_MAP_NODE] = into_node[LINE_NUM_NODE]
+            edge[CHILD_IDX_EDGE] = into_node[IDX_NODE]
+            edge[INTO_LINE_NUM_EDGE] = into_node[LINE_NUM_NODE]
+
 
             # add the edge to the out of map
             node[OUTOF_EDGES_MAP_NODE][into_node[IDX_NODE]] = edge[IDX_EDGE]
@@ -1010,15 +1007,16 @@ class Lab3:
             # print('ARG3 INTO NODE: ')
             # self.print_node(into_node)
             # make the edge
-            edge = []
+            edge = [0] * 8
             edge[IDX_EDGE] = len(self.edges_list) - 1   # 0
             edge[KIND_EDGE] = DATA  # 1
             edge[LATENCY_EDGE] = into_node[DELAY_NODE]    # latency of the edge is the delay of the first operation (into_node)
             edge[VR_EDGE] = node[IR_ARG3_NODE][1]  # 3
-            edge[PARENT_IDX] = node[IDX_NODE]
+            edge[PARENT_IDX_EDGE] = node[IDX_NODE]
             edge[OUTOF_LINE_NUM_EDGE] = node[LINE_NUM_NODE]
-            edge[CHILD_IDX] = into_node[IDX_NODE]
-            edge[INTO_EDGES_MAP_NODE] = into_node[LINE_NUM_NODE]
+            edge[CHILD_IDX_EDGE] = into_node[IDX_NODE]
+            edge[INTO_LINE_NUM_EDGE] = into_node[LINE_NUM_NODE]
+
 
             # add the edge to the out of map
             node[OUTOF_EDGES_MAP_NODE][into_node[IDX_NODE]] = edge[IDX_EDGE]
@@ -1027,9 +1025,74 @@ class Lab3:
             # add to edges list
             self.edges_list.append(edge)
          
-         
-        
+    def add_serial_edge(self, parent_node, child_node):
+        """
+            Add a serial edge from parent_node to child_node
+        """
+        # print("ADD SERIAL EDGE")
+        edge = [0] * 8
+        edge[IDX_EDGE] = len(self.edges_list) - 1   # 0
+        edge[KIND_EDGE] = SERIAL
+        edge[LATENCY_EDGE] = 1 # "one cycle latency is enough"
+        edge[PARENT_IDX_EDGE] = parent_node[IDX_NODE]
+        edge[OUTOF_LINE_NUM_EDGE] = parent_node[LINE_NUM_NODE]
+        edge[CHILD_IDX_EDGE] = child_node[IDX_NODE]
+        edge[INTO_EDGES_MAP_NODE] = child_node[LINE_NUM_NODE]
 
+        # add the edge to the out of map
+        parent_node[OUTOF_EDGES_MAP_NODE][child_node[IDX_NODE]] = edge[IDX_EDGE]
+        # add edge to child's into map
+        child_node[INTO_EDGES_MAP_NODE][parent_node[IDX_NODE]] = edge[IDX_EDGE]
+        # add to edges list
+        self.edges_list.append(edge)
+        
+    def add_conflict_edge(self, parent_node, child_node):
+        """
+            Add a serial edge from parent_node to child_node
+            parent_node: second op
+            child_node: first op
+        """
+        # print("ADD CONFLICR EDGE")
+        edge = [0] * 8
+        edge[IDX_EDGE] = len(self.edges_list) - 1   # 0
+        edge[KIND_EDGE] = CONFLICT
+        edge[LATENCY_EDGE] = child_node[DELAY_NODE] # latency equal to the latency of the first operation
+        edge[PARENT_IDX_EDGE] = parent_node[IDX_NODE]
+        edge[OUTOF_LINE_NUM_EDGE] = parent_node[LINE_NUM_NODE]
+        edge[CHILD_IDX_EDGE] = child_node[IDX_NODE]
+        edge[INTO_EDGES_MAP_NODE] = child_node[LINE_NUM_NODE]
+
+
+        # add the edge to the out of map
+        parent_node[OUTOF_EDGES_MAP_NODE][child_node[IDX_NODE]] = edge[IDX_EDGE]
+        # add edge to child's into map
+        child_node[INTO_EDGES_MAP_NODE][parent_node[IDX_NODE]] = edge[IDX_EDGE]
+        # add to edges list
+        self.edges_list.append(edge)
+    
+    def identify_roots_and_leaves(self):
+        """
+            To be done after all nodes and edges are added but before priorities computed
+            For each node, determines if it is 
+                a root (set node.root = true)
+                a leaf (set node.leaf = true)
+                or neither (do nothing)
+            
+            Returns mapping. key = 0, value = roots; key = 1, value = leaves
+        """
+        if (self.DEBUG_FLAG == True): print("[identify_roots_and_leaves]")
+        tmp_roots = []
+        tmp_leaves = []
+        for node in self.nodes_list:
+            if (len(node[INTO_EDGES_MAP_NODE]) == 0):
+                node[ROOT_BOOL_NODE] = True
+                tmp_roots.append(node)
+            if (len(node[OUTOF_EDGES_MAP_NODE]) == 0):
+                node[LEAF_BOOL_NODE] = True
+                tmp_leaves.append(node)
+        self.roots = tmp_roots
+        self.leaves = tmp_leaves
+    
 
     def get_full_op(self, node):
         """
@@ -1050,14 +1113,158 @@ class Lab3:
         if (node.opcode != 8):
             rh = "=> r" + str(node.arg3[VR_IDX])
 
-        opcode = self.opcodes_list[node.opcode] + " "
+        opcode = opcodes_list[node.opcode] + " "
 
         temp = opcode + lh + " " + rh
         return temp
 
+    def NEW_convert_edge_map(self):
+        """
+            different graph representation
+            convert edge list to map
+            {parent idx : [(child idx, edge_latency), ...]}
 
+        """
+        self.node_edge_map = {node: [] for node in self.nodes_list}
+        for edge in self.edgeS_list:
+            parent_idx = edge[PARENT_IDX_EDGE]
+            child_idx = edge[CHILD_IDX_EDGE]
+            edge_latency = edge[LATENCY_EDGE]
+            tuple = (child_idx, edge_latency)
+            self.node_edge_map[parent_idx].append(tuple)
 
+    def NEW_print_edge_map(self):
+        tmp = "{"
+        for parent_idx, edges in self.node_edge_map.items():
+            tmp += str(self.nodes_list[parent_idx][LINE_NUM_NODE])
+            tmp += ": ["
+            for tuple in edges: 
+                cunt = "(" + str(tuple[0].line_num) + ", " + str(tuple[1]) + "), "
+                tmp += cunt
+            tmp += "], "
+        tmp += "}"
+        print(tmp)
+    
+    def NEW_set_priorities(self, start):
+        """
+            Start is a node in node format (list) from the roots
+        """
+        # initialized stack with the start node and its priority
+        stack = [(start, 0)]
 
+        while stack:
+            current, parent_priority = stack.pop()
+
+            # update priority for the current node only if its higher than the current priority
+            current_priority = max(parent_priority, self.nodes_list[current[IDX_NODE]][PRIORITY_NODE])
+            self.nodes_list[current[IDX_NODE]][PRIORITY_NODE] = current_priority
+
+            # push neighbors onto stack in reverse order to match th eorder of recursive function
+            for neighbor, edge_latency in reversed(self.node_edge_map.get(current, [])):
+                stack.append((neighbor, current_priority + edge_latency))
+
+    def print_dot(self):
+        """
+            Prints the dot file.
+        """
+        print("digraph DG {")
+        self.print_nodes()
+        # self.print_edges()
+        for node in self.nodes_list:
+            self.print_edges(node)
+        print("}")
+    
+    def print_nodes(self):
+        """
+            format:   1 [label="1:  loadI  8 => r3"];
+        """
+        ret = ""
+        for node in self.nodes_list:
+            temp = "  " # indent
+            temp += str(node[LINE_NUM_NODE])
+            temp += ' [ label="'
+            temp += str(node[LINE_NUM_NODE])
+            temp += ":  "
+            poo = node[FULL_OP_NODE]
+            temp += poo
+            # priority
+            temp += '\n'
+            temp += "prio:  "
+            temp += str(node[PRIORITY_NODE])
+            if (self.DEBUG_FLAG == True):
+                temp += '\n'
+                temp += "delay:  "
+                temp += str(node[DELAY_NODE])
+
+                if (node[ROOT_BOOL_NODE]):
+                    temp += '\n'
+                    temp += "root"
+                if (node[LEAF_BOOL_NODE]):
+                    temp += '\n'
+                    temp += "leaf"
+            temp += '"];'
+            temp += '\n'
+            ret += temp
+        print(ret)
+    
+
+    def print_edges(self, node):
+        """
+            format of each node:   3 -> 1 [ label=" Data, vr3"];
+              7 -> 6 [ label=" Conflict "];
+            <line num of node edge is coming OUT OF (parent)> -> <line num of node edge is going INTO (child)> [ label = " <kind> "];
+        """
+        ret = ""
+        
+        for key, edge in node[OUTOF_EDGES_MAP_NODE].items():
+            temp = "  " # indent
+            temp += str(node[LINE_NUM_NODE])   # line num of node edge is coming OUT OF (parent)
+            temp += " -> "
+            temp += str(key) # edge.into_line_num
+            temp += ' [ label=" '
+            if (edge[KIND_EDGE] != DATA):
+                temp += self.kinds[edge[KIND_EDGE]]
+            elif (edge[KIND_EDGE] == DATA):
+                temp += self.kinds[edge[KIND_EDGE]]
+                temp += ', vr'
+                temp += str(edge[VR_EDGE])
+            
+            if (self.DEBUG_FLAG == True):
+                temp += " ; Latency = "
+                temp += str(edge[LATENCY_EDGE])
+            temp += '"];'
+            temp += '\n'
+            ret += temp
+        print(ret)
+    
+
+    def graph_consistency_checker(self):
+        """
+            Make sure that if node A thought it had an edge that ran to node B,
+              node B also thought it had an edge that ran to node A
+        """
+        total_count = 0
+        success_count = 0
+        fail_count = 0
+        for node in self.nodes_list:
+            # print(node)
+            # for each out edge (ex: edge ran to node b)
+            for child_linenum, edge in node[OUTOF_EDGES_MAP_NODE].items():
+                total_count += 1
+                # get the child 
+                child = self.nodes_list[edge[CHILD_IDX_EDGE]]
+                # get child's into edges
+                into_edges = child[INTO_EDGES_MAP_NODE]   # key == node.linenum ()
+                key_to_check = node[IDX_NODE]
+                value_to_check = edge
+                # Check if the key is in into_edges and if the corresponding value matches
+                if key_to_check in into_edges and into_edges[key_to_check] == value_to_check:
+                    success_count += 1
+                    # print(f"The key-value (parent node linenum, edge) pair ({key_to_check}: {value_to_check}) exists in into_edges.")
+                else:
+                    print(f"// The key-value (parent node linenum, edge) pair ({key_to_check}: {value_to_check}) does not exist in into_edges.")
+                    fail_count += 1
+        if (self.DEBUG_FLAG == True): print("// " + str(success_count) + " / " + str(total_count) + " into/outof edges correct")
     # 🏳️‍🌈🏳️‍🌈🏳️‍🌈🏳️‍🌈🏳️‍🌈🏳️‍🌈🏳️‍🌈🏳️‍🌈🏳️‍🌈🏳️‍🌈🏳️‍🌈🏳️‍🌈🏳️‍🌈🏳️‍🌈🏳️‍🌈🏳️‍🌈🏳️‍🌈🏳️‍🌈🏳️‍🌈🏳️‍🌈🏳️‍🌈🏳️‍🌈🏳️‍🌈🏳️‍🌈🏳️‍🌈🏳️‍🌈🏳️‍🌈🏳️‍🌈🏳️‍🌈🏳️‍🌈🏳️‍🌈🏳️‍🌈🏳️‍🌈🏳️‍🌈🏳️‍🌈🏳️‍🌈🏳️‍🌈🏳️‍🌈🏳️‍🌈
 
        
@@ -1125,7 +1332,9 @@ def main():
 
         
         Lab_3 = Lab3(Lab_2.IR_LIST, DEBUG_FLAG, GRAPH_ONLY)
-        Lab_3.build_graph()
+        # Lab_3.build_graph()
+        Lab_3.build_new_graph()
+
         if (GRAPH_ONLY == False):
             Lab_3.main_schedule()
     
