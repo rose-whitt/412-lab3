@@ -63,9 +63,10 @@ class Lab3:
     """
     
     """
-    def __init__(self, IR_LIST, DEBUG_FLAG):
+    def __init__(self, IR_LIST, DEBUG_FLAG, GRAPH_ONLY):
         self.IR_LIST = IR_LIST
         self.DEBUG_FLAG = DEBUG_FLAG
+        self.GRAPH_ONLY = GRAPH_ONLY
         self.DP_MAP = DependenceGraph(DEBUG_FLAG)
         self.kinds = ["Data", "Serial", "Conflict"]
         self.roots = []
@@ -83,9 +84,16 @@ class Lab3:
         self.num_nodes = 0
 
         ####################### NEW DEPENDENCE GRAPH IMP #######################
-        # Node format [IDX, op IDX, Full OP, PRED, SUCC, Delay, Priority, Status]
+        # Node format [line num, IDX, op IDX, Full OP (like loadI 12 => r1), PRED (previous), SUCC (next), Delay, Priority, Status]
+        nodes_list = []
+        # Edge format [idx, from (index of node it is coming out of), to (index of node that it is going into), latency, type]
+        edges_list = []
+        # child to parent list format: idx = child node index in nodes_list, element list of indices of parents
+        child_to_parents = []
+        # parent to child list format: idx = parent node index in nodes_list, element list of indices of children
+        parent_to_children = []
 
-        #Edge format lidx, from, to, pred, succ, latency,
+        
 
     def build_graph(self):
         # print("WASSUP BITCH")
@@ -779,8 +787,8 @@ class Lab3:
 
 
 def main():
-    pr = cProfile.Profile()
-    pr.enable()
+    # pr = cProfile.Profile()
+    # pr.enable()
     # print("in lab3 main")
     # print(sys.argv)
     if (sys.argv[1] == '-h'):
@@ -796,6 +804,7 @@ def main():
         print("                     Scan, parse, rename, and allocate code in the input block given in filename so that it uses")
         print("                     only registers r0 to rk-1 and prints the resulting code in the stdout.")
         print("     [filename]          Runs lab3, i.e. used to invoke schedule shit.")
+        print("     -g [filename]       Runs lab3 but only builds the graph (i.e. doesn't do scheduling)")
         print("     -x [filename]          Debugging for lab3. Runs lab3 like normal but prints extra info for debugging like latency-weighted distance in nodes in graph/dot file, latency of edge in graph/dot file, VR_TO_NODE map, and any other things I decide.")
 
     else:
@@ -823,20 +832,25 @@ def main():
         # Lab_2.main()
         f.close()
         DEBUG_FLAG = False
+        GRAPH_ONLY = False
         if (sys.argv[1] == '-x'):
             DEBUG_FLAG = True
+        
+        if (sys.argv[1] == '-g'):
+            GRAPH_ONLY
+
 
         
-        Lab_3 = Lab3(Lab_2.IR_LIST, DEBUG_FLAG)
+        Lab_3 = Lab3(Lab_2.IR_LIST, DEBUG_FLAG, GRAPH_ONLY)
         Lab_3.build_graph()
         Lab_3.main_schedule()
     
-    pr.disable()
-    s = StringIO()
-    sortby = 'cumulative'
-    ps = pstats.Stats(pr, stream=s).sort_stats(sortby)
-    ps.print_stats()
-    sys.stdout.write(s.getvalue())
+    # pr.disable()
+    # s = StringIO()
+    # sortby = 'cumulative'
+    # ps = pstats.Stats(pr, stream=s).sort_stats(sortby)
+    # ps.print_stats()
+    # sys.stdout.write(s.getvalue())
 
 
 
