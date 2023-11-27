@@ -720,12 +720,12 @@ class Lab3:
             if (f0_op != NOP_OP):
                 f0_op.status = ACTIVE
                 active.append((f0_op, f0_op.delay + cycle))
-                if (f0_op == LOAD_OP or f0_op == STORE_OP or f0_op == OUTPUT_OP):
+                if (f0_op.type == LOAD_OP or f0_op.type == STORE_OP or f0_op.type == OUTPUT_OP):
                     early_release_ops.append(f0_op)
             if (f1_op != NOP_OP):
                 f1_op.status = ACTIVE
                 active.append((f1_op, f1_op.delay + cycle))
-                if (f1_op == LOAD_OP or f1_op == STORE_OP or f1_op == OUTPUT_OP):
+                if (f1_op.type == LOAD_OP or f1_op.type == STORE_OP or f1_op.type == OUTPUT_OP):
                     early_release_ops.append(f1_op)
             self.schedule[F0][cycle] = f0_op
             self.schedule[F1][cycle] = f1_op
@@ -784,29 +784,30 @@ class Lab3:
             if (self.DEBUG_FLAG == True): 
                 print("len(multi_cycle_active) = " + str(len(multi_cycle_active)) + " vs. len(early_release_ops) = " + str(len(early_release_ops)))
             
+            # TODO: this doesnt seem to work
             # Find each multi-cycle (load, store, mult) operation o in Active
-            for pair in early_release_ops:
-                # Check operations that depend on o for early releases (into, parent)
-                #for each operation y that has a serial dependence back to op in active_set
-                for parent_linenum, edge in pair[0].into_edges.items():
-                    satisfied = True
-                    if (edge.kind == SERIAL):
-                        y = edge.parent
-                        # check all dependences of edge.parent (y)
-                        for pl, e in y.outof_edges.items():
-                            # check all non-serial dependences are finished 
-                            if (e.kind == SERIAL):
-                                if (e.child.status != ACTIVE):
-                                    satisfied = False
-                            else:
-                                if (e.child.status != RETIRED):
-                                    satisfied = False
-                        if (satisfied): # Add y to the Ready set
-                            if (self.DEBUG_FLAG == True): print("early release- Adding " + str(d.line_num) + " to the ready set!")
-                            y.status = READY
-                            ready.append(y)
-                        else:
-                            if (self.DEBUG_FLAG == True): print("early release- Depending ops of " + str(d.line_num) + " are not ready")
+            # for node in early_release_ops:
+            #     # Check operations that depend on o for early releases (into, parent)
+            #     #for each operation y that has a serial dependence back to op in active_set
+            #     for parent_linenum, edge in node.into_edges.items():
+            #         satisfied = True
+            #         if (edge.kind == SERIAL):
+            #             y = edge.parent
+            #             # check all dependences of edge.parent (y)
+            #             for pl, e in y.outof_edges.items():
+            #                 # check all non-serial dependences are finished 
+            #                 if (e.kind == SERIAL):
+            #                     if (e.child.status != ACTIVE):
+            #                         satisfied = False
+            #                 else:
+            #                     if (e.child.status != RETIRED):
+            #                         satisfied = False
+            #             if (satisfied): # Add y to the Ready set
+            #                 if (self.DEBUG_FLAG == True): print("early release- Adding " + str(d.line_num) + " to the ready set!")
+            #                 y.status = READY
+            #                 ready.append(y)
+            #             else:
+            #                 if (self.DEBUG_FLAG == True): print("early release- Depending ops of " + str(d.line_num) + " are not ready")
 
                             
 
@@ -1193,7 +1194,7 @@ class Lab3:
 
             # push neighbors onto stack in reverse order to match th eorder of recursive function
             for neighbor_idx, edge_latency in reversed(self.node_edge_map.get(current_node_idx, [])):
-                # print("Cunt")
+                print("Cunt")
                 stack.append((neighbor_idx, current_priority + edge_latency))
 
     def print_dot(self):
@@ -1324,6 +1325,156 @@ class Lab3:
                 return True
         return False
     
+
+    def NEW_main_schedule(self):
+        if (self.DEBUG_FLAG == True): print("[MAIN SCHEDULE]")
+        # set number of nodes
+        self.num_nodes = len(self.nodes_list)
+        if (self.DEBUG_FLAG == True):
+            print(str(self.num_nodes) + " nodes")
+        
+        # initialize schedule
+        # for i in range(1, self.num_nodes + 1):
+        #     self.schedule[F0][i] = None
+        #     self.schedule[F1][i] = None
+
+        self.NEW_schedule_algo()
+        self.print_schedule()
+        # print(self.DP_MAP.nodes_map[1])
+        # print(self.DP_MAP.get_ir_node(self.DP_MAP.nodes_map[1].ir_list_node))
+
+    def NEW_schedule_algo(self):
+        if (self.DEBUG_FLAG == True): print("[SCHEDULE ALGO]")
+
+        cycle = 1
+        # Sort the list in descending order based on the age attribute
+        sorted_objects = sorted(self.leaves, key=lambda n: n[PRIORITY_NODE], reverse=True)
+        ready = sorted_objects # array of nodes
+        active = [] # array of pairs- (node, cycle that the node will come off the active list)
+
+        # if (self.DEBUG_FLAG == True): self.print_ready(ready)
+
+        if (self.DEBUG_FLAG == True): print("BEGINNING WHILE LOOP")
+        if (self.DEBUG_FLAG == True): print(len(ready))
+        if (self.DEBUG_FLAG == True): print(len(active))
+        # Terminate when active and ready lists are empty
+        while ((len(ready) == 0 and len(active) == 0) == False):
+            if (self.DEBUG_FLAG == True): self.print_schedule()
+            sorted_objects = sorted(ready, key=lambda n: n[PRIORITY_NODE], reverse=True)
+            ready = sorted_objects # array of nodes
+            if (self.DEBUG_FLAG == True): print("CYCLE: " + str(cycle))
+            # Pick an operation, o, for each functional unit
+            ops = self.NEW_get_operations_for_units(ready)  # TODO: MAKE THIS
+
+            early_release_ops = []
+            
+            if (self.DEBUG_FLAG == True):
+                print(len(ops))
+                print("OPS:")
+                print(ops)
+
+                self.NEW_print_ready(ready) # TODO: MAKE THIS
+                self.NEW_print_active(active)   # TODO: MAKE THIS
+            f0_op = ops[F0]
+            f1_op = ops[F1]
+            # Move o from Ready to Active
+            if (f0_op != NOP_OP):
+                f0_op[STATUS_NODE] = ACTIVE
+                active.append((f0_op, f0_op[DELAY_NODE] + cycle))
+                if (f0_op[TYPE_NODE] == LOAD_OP or f0_op[TYPE_NODE] == STORE_OP or f0_op[TYPE_NODE] == OUTPUT_OP):
+                    early_release_ops.append(f0_op)
+            if (f1_op != NOP_OP):
+                f1_op.status = ACTIVE
+                active.append((f1_op, f1_op.delay + cycle))
+                if (f1_op[TYPE_NODE] == LOAD_OP or f1_op[TYPE_NODE] == STORE_OP or f1_op[TYPE_NODE] == OUTPUT_OP):
+                    early_release_ops.append(f1_op)
+            self.schedule[F0][cycle] = f0_op
+            self.schedule[F1][cycle] = f1_op
+
+
+            if (self.DEBUG_FLAG == True):
+                print("ACTIVE AFTER APPENDING")
+                self.print_active(active)
+
+            # Increment cycle
+            cycle += 1
+
+            # get active ops that have retired
+            retired = []
+            for pair in active:
+                if (pair[1] == cycle):
+                    retired.append(pair)
+                    pair[0][STATUS_NODE] = RETIRED
+            
+
+            # Find each op, o, in Active that retires
+            for pair in retired:
+                # Remove o from Active
+                active.remove(pair)
+                # For each op, d, that depends on o (into, d = parent)
+                for parent_idx, edge_idx in pair[0].into_edges.items():
+                    edge = self.edges_list[edge_idx]
+                    d = self.nodes_list[edge[PARENT_IDX_EDGE]]
+                    
+                    all_ready = True
+                    # check outof nodes of d
+                    for child_idx, out_edge_idx in d.outof_edges.items():
+                        out_edge = self.edges_list[out_edge_idx]
+                        child = self.nodes_list[out_edge[child_idx]]
+                        # If d is now "ready" (operation that defined that operand is completed/retired- "If a node represents a use of a value, it has an edge to the node that defines that value")
+                        if (child[STATUS_NODE] != RETIRED):
+                            all_ready = False
+                    if (all_ready): # Add d to the Ready set
+                        if (self.DEBUG_FLAG == True): print("Defining ops ready! Adding " + str(d[LINE_NUM_NODE]) + " to the ready set!")
+                        if (d not in ready):
+                            d[STATUS_NODE] = READY
+                            ready.append(d)
+                    else:
+                        if (self.DEBUG_FLAG == True): print("Defining ops of " + str(d[LINE_NUM_NODE]) + " are not ready")
+
+
+                        
+            # If this iteration of the while loop added a load, store, or output operation to the active set, call it x
+
+            # "for each operation y that has a serial dependence back to op in active_set,
+            # If all the other dependences for y have been satisfied,
+            # then y can move onto the Ready set now that operation op has been scheduled.
+            # satisified means: all other non-serial dependences are finished and all serial dependences are scheduled
+            multi_cycle_active = []
+            for pair in active:
+                if (pair[0][TYPE_NODE] == LOAD_OP or pair[0][TYPE_NODE] == STORE_OP or pair[0][TYPE_NODE] == OUTPUT_OP):
+                    multi_cycle_active.append(pair)
+                
+            if (self.DEBUG_FLAG == True): 
+                print("len(multi_cycle_active) = " + str(len(multi_cycle_active)) + " vs. len(early_release_ops) = " + str(len(early_release_ops)))
+            
+            # # Find each multi-cycle (load, store, mult) operation o in Active
+            # for pair in early_release_ops:
+            #     # Check operations that depend on o for early releases (into, parent)
+            #     #for each operation y that has a serial dependence back to op in active_set
+            #     for parent_linenum, edge in pair[0].into_edges.items():
+            #         satisfied = True
+            #         if (edge.kind == SERIAL):
+            #             y = edge.parent
+            #             # check all dependences of edge.parent (y)
+            #             for pl, e in y.outof_edges.items():
+            #                 # check all non-serial dependences are finished 
+            #                 if (e.kind == SERIAL):
+            #                     if (e.child.status != ACTIVE):
+            #                         satisfied = False
+            #                 else:
+            #                     if (e.child.status != RETIRED):
+            #                         satisfied = False
+            #             if (satisfied): # Add y to the Ready set
+            #                 if (self.DEBUG_FLAG == True): print("early release- Adding " + str(d.line_num) + " to the ready set!")
+            #                 y.status = READY
+            #                 ready.append(y)
+            #             else:
+            #                 if (self.DEBUG_FLAG == True): print("early release- Depending ops of " + str(d.line_num) + " are not ready")
+
+        
+
+
     # 🏳️‍🌈🏳️‍🌈🏳️‍🌈🏳️‍🌈🏳️‍🌈🏳️‍🌈🏳️‍🌈🏳️‍🌈🏳️‍🌈🏳️‍🌈🏳️‍🌈🏳️‍🌈🏳️‍🌈🏳️‍🌈🏳️‍🌈🏳️‍🌈🏳️‍🌈🏳️‍🌈🏳️‍🌈🏳️‍🌈🏳️‍🌈🏳️‍🌈🏳️‍🌈🏳️‍🌈🏳️‍🌈🏳️‍🌈🏳️‍🌈🏳️‍🌈🏳️‍🌈🏳️‍🌈🏳️‍🌈🏳️‍🌈🏳️‍🌈🏳️‍🌈🏳️‍🌈🏳️‍🌈🏳️‍🌈🏳️‍🌈🏳️‍🌈
 
        
