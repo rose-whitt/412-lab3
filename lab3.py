@@ -281,8 +281,7 @@ class Lab3:
         for root in self.roots:
             self.set_priorities(root)
         
-        if (self.DEBUG_FLAG == True or self.GRAPH_ONLY == True):
-            self.DP_MAP.print_dot()
+        if (self.DEBUG_FLAG == True): self.DP_MAP.print_dot()
         # self.DP_MAP.print_dot()
 
         if (self.DEBUG_FLAG == True):
@@ -358,6 +357,7 @@ class Lab3:
             edge_latency = edge.latency
             tuple = (child, edge_latency)
             self.node_edge_map[parent].append(tuple)
+
     
     def print_edge_map(self):
         tmp = "{"
@@ -752,7 +752,9 @@ class Lab3:
                 active.remove(pair)
                 # For each op, d, that depends on o (into, d = parent)
                 for parent_linenum, edge in pair[0].into_edges.items():
+                    print("d:")
                     d = edge.parent
+                    print(d)
                     
                     all_ready = True
                     # check outof nodes of d
@@ -1144,14 +1146,18 @@ class Lab3:
 
         """
         print("NEW CONVERT EDGE MAP")
+        print(self.edges_list)
         # self.node_edge_map = {node: [] for node in self.nodes_list}
         for node in self.nodes_list:
             self.node_edge_map[node[IDX_NODE]] = []
         for edge in self.edges_list:
+            print(edge)
             parent_idx = edge[PARENT_IDX_EDGE]
+            print(parent_idx)
             child_idx = edge[CHILD_IDX_EDGE]
             edge_latency = edge[LATENCY_EDGE]
             tuple = (child_idx, edge_latency)
+            print(self.node_edge_map[parent_idx])
             self.node_edge_map[parent_idx].append(tuple)
         
 
@@ -1161,10 +1167,12 @@ class Lab3:
 
         tmp = "{"
         for parent_idx, edges in self.node_edge_map.items():
+            print(parent_idx)
             tmp += str(self.nodes_list[parent_idx][LINE_NUM_NODE])
             tmp += ": ["
-            for tuple in edges: 
-                cunt = "(" + str(tuple[0].line_num) + ", " + str(tuple[1]) + "), "
+            for tuple in edges:
+                child = self.nodes_list[tuple[0]]
+                cunt = "(" + str(child[LINE_NUM_NODE]) + ", " + str(tuple[1]) + "), "
                 tmp += cunt
             tmp += "], "
         tmp += "}"
@@ -1339,7 +1347,7 @@ class Lab3:
         #     self.schedule[F1][i] = None
 
         self.NEW_schedule_algo()
-        self.print_schedule()
+        self.NEW_print_schedule()
         # print(self.DP_MAP.nodes_map[1])
         # print(self.DP_MAP.get_ir_node(self.DP_MAP.nodes_map[1].ir_list_node))
 
@@ -1359,12 +1367,13 @@ class Lab3:
         if (self.DEBUG_FLAG == True): print(len(active))
         # Terminate when active and ready lists are empty
         while ((len(ready) == 0 and len(active) == 0) == False):
-            if (self.DEBUG_FLAG == True): self.print_schedule()
+            self.NEW_print_statuses()
+            if (self.DEBUG_FLAG == True): self.NEW_print_schedule()
             sorted_objects = sorted(ready, key=lambda n: n[PRIORITY_NODE], reverse=True)
             ready = sorted_objects # array of nodes
             if (self.DEBUG_FLAG == True): print("CYCLE: " + str(cycle))
             # Pick an operation, o, for each functional unit
-            ops = self.NEW_get_operations_for_units(ready)  # TODO: MAKE THIS
+            ops = self.NEW_get_operations_for_units(ready)
 
             early_release_ops = []
             
@@ -1373,8 +1382,8 @@ class Lab3:
                 print("OPS:")
                 print(ops)
 
-                self.NEW_print_ready(ready) # TODO: MAKE THIS
-                self.NEW_print_active(active)   # TODO: MAKE THIS
+                self.NEW_print_ready(ready)
+                self.NEW_print_active(active)
             f0_op = ops[F0]
             f1_op = ops[F1]
             # Move o from Ready to Active
@@ -1384,8 +1393,8 @@ class Lab3:
                 if (f0_op[TYPE_NODE] == LOAD_OP or f0_op[TYPE_NODE] == STORE_OP or f0_op[TYPE_NODE] == OUTPUT_OP):
                     early_release_ops.append(f0_op)
             if (f1_op != NOP_OP):
-                f1_op.status = ACTIVE
-                active.append((f1_op, f1_op.delay + cycle))
+                f1_op[STATUS_NODE] = ACTIVE
+                active.append((f1_op, f1_op[DELAY_NODE] + cycle))
                 if (f1_op[TYPE_NODE] == LOAD_OP or f1_op[TYPE_NODE] == STORE_OP or f1_op[TYPE_NODE] == OUTPUT_OP):
                     early_release_ops.append(f1_op)
             self.schedule[F0][cycle] = f0_op
@@ -1394,7 +1403,7 @@ class Lab3:
 
             if (self.DEBUG_FLAG == True):
                 print("ACTIVE AFTER APPENDING")
-                self.print_active(active)
+                self.NEW_print_active(active)
 
             # Increment cycle
             cycle += 1
@@ -1412,17 +1421,20 @@ class Lab3:
                 # Remove o from Active
                 active.remove(pair)
                 # For each op, d, that depends on o (into, d = parent)
-                for parent_idx, edge_idx in pair[0].into_edges.items():
+                for parent_idx, edge_idx in pair[0][INTO_EDGES_MAP_NODE].items():
                     edge = self.edges_list[edge_idx]
                     d = self.nodes_list[edge[PARENT_IDX_EDGE]]
+                    print("d:")
+                    print(d[FULL_OP_NODE])
                     
                     all_ready = True
                     # check outof nodes of d
-                    for child_idx, out_edge_idx in d.outof_edges.items():
+                    for child_idx, out_edge_idx in d[OUTOF_EDGES_MAP_NODE].items():
                         out_edge = self.edges_list[out_edge_idx]
-                        child = self.nodes_list[out_edge[child_idx]]
+                        child = self.nodes_list[child_idx]
                         # If d is now "ready" (operation that defined that operand is completed/retired- "If a node represents a use of a value, it has an edge to the node that defines that value")
                         if (child[STATUS_NODE] != RETIRED):
+                            print("child retired")
                             all_ready = False
                     if (all_ready): # Add d to the Ready set
                         if (self.DEBUG_FLAG == True): print("Defining ops ready! Adding " + str(d[LINE_NUM_NODE]) + " to the ready set!")
@@ -1473,7 +1485,341 @@ class Lab3:
             #                 if (self.DEBUG_FLAG == True): print("early release- Depending ops of " + str(d.line_num) + " are not ready")
 
         
+    def NEW_get_operations_for_units(self, ready):
+        """
+            Get an operation for each functional unit based on the highest priority and remove those from ready
+                and these constraints:
+                Load and store operations: only f0
+                loadI: f0 or f1
+                Mult: f1
+                Output: f0 or f1, but only one per cycle (latency == cycle counts)
+            
+            returns array where index 0 is node for f0 and index 1 is node for f1
+        """
+        f0_node = None
+        f1_node = None
 
+
+        if (self.DEBUG_FLAG == True):
+            print("[get_operations_for_units]")
+            print("READY BEFORE")
+            self.NEW_print_ready(ready)
+
+
+        if (len(ready) == 0):
+            return [NOP_OP, NOP_OP]
+        
+        
+        num_restricted = 0
+        restricted_ready = []
+        unrestricted_ready = []
+        for node in ready:
+            if (node[TYPE_NODE] == LOAD_OP or node[TYPE_NODE] == STORE_OP or node[TYPE_NODE] == MULT_OP or node[TYPE_NODE] == OUTPUT_OP):
+                num_restricted += 1
+                node[STATUS_NODE] = READY
+                restricted_ready.append(node)
+            else:
+                unrestricted_ready.append(node)
+                node[STATUS_NODE] = READY
+      
+        if (self.DEBUG_FLAG == True):
+            print("RESTRICTED READY:")
+            self.NEW_print_ready(restricted_ready)
+            print("UNRESTRICTED READY:")
+            self.NEW_print_ready(unrestricted_ready)
+
+        # 🔒🔒🔒🔒🔒🔒🔒 First, restricted nodes 🔒🔒🔒🔒🔒🔒🔒🔒
+        # f0
+        for node in restricted_ready:
+            # at least one unit still open
+            if (f0_node == None or f1_node == None):
+                # only on f0
+                if (node[TYPE_NODE] == LOAD_OP or node[TYPE_NODE] == STORE_OP):
+                    if (f0_node == None): # hasnt been assigned yet
+                        f0_node = node
+                # only on f1
+                if (node[TYPE_NODE] == MULT_OP):
+                    if (f1_node == None): # hasnt been assigned yet
+                        f1_node = node
+                # takes whole cycle
+                if (node[TYPE_NODE] == OUTPUT_OP):
+                    # havent already assigned either unit
+                    if (f0_node == None and f1_node == None):
+                        f0_node = node
+                        f1_node = NOP_OP
+                        ready.remove(node)
+                        return [f0_node, f1_node]
+        
+        # check if we have filled f0 and f1
+        if (f0_node != None and f1_node != None):
+            if (f0_node in ready):  # havent already removed
+                ready.remove(f0_node)
+            if (f1_node in ready):  # havent already removed
+                ready.remove(f1_node)
+            return [f0_node, f1_node]
+
+        # check we have removed everything
+        if (f0_node != None and f0_node in ready):
+            ready.remove(f0_node)
+        if (f0_node != None and f0_node in restricted_ready):
+            restricted_ready.remove(f0_node)
+        if (f1_node != None and f1_node in ready):
+            ready.remove(f1_node)
+        if (f1_node != None and f1_node in restricted_ready):
+            restricted_ready.remove(f1_node)
+        
+
+        # 🔒🔒🔒🔒🔒🔒 END OF RESTRICTED READY PRIORITY 🔒🔒🔒🔒🔒🔒🔒🔒🔒
+
+        # ❄️❄️❄️❄️❄️❄️ Next, prioritize loadI ❄️❄️❄️❄️❄️❄️❄️❄️❄️
+        # see if there is a loadI we can put in the empty slot
+        for node in unrestricted_ready:
+            if (node[TYPE_NODE] == LOADI_OP):
+                # check that it is not somehow already one of the issue slots
+                if (f0_node != node and f1_node != node):
+                    # find the open slot
+                    if (f0_node == None):
+                        f0_node = node
+                    elif (f1_node == None):
+                        f1_node = node
+        # check we remove everything
+        if (f0_node in ready):
+            ready.remove(f0_node)
+        if (f0_node in unrestricted_ready):
+            unrestricted_ready.remove(f0_node)
+        if (f1_node in ready):
+            ready.remove(f1_node)
+        if (f1_node in unrestricted_ready):
+            unrestricted_ready.remove(f1_node)
+        
+        # check if we have filled f0 and f1
+        if (f0_node != None and f1_node != None):
+            return [f0_node, f1_node]
+        
+        # ❄️❄️❄️❄️❄️❄️❄️❄️ END OF LOADI PRIORITY ❄️❄️❄️❄️❄️❄️❄️❄️❄️❄️
+
+        # 🏳️‍🌈🏳️‍🌈🏳️‍🌈🏳️‍🌈🏳️‍🌈🏳️‍🌈🏳️‍🌈 Priority based from unrestricted list 🏳️‍🌈🏳️‍🌈🏳️‍🌈🏳️‍🌈🏳️‍🌈🏳️‍🌈🏳️‍🌈🏳️‍🌈
+        # check if there is anything in unrestricted_ready
+        if (len(unrestricted_ready) == 0):
+            # nothing else to do so we need to make the issue slot and return
+            if (f0_node == None):
+                f0_node = NOP_OP
+            if (f1_node == None):
+                f1_node = NOP_OP
+            # return
+            return [f0_node, f1_node]
+
+        # check if there is only one thing in unrestricted ready, so return
+        if (len(unrestricted_ready) == 1):
+            # find the empty slot
+            # both slots open
+            if (f0_node == None and f1_node == None):
+                f0_node = unrestricted_ready[0]
+                f1_node = NOP_OP
+            # only one slot open
+            elif (f0_node == None):
+                f0_node = unrestricted_ready[0]
+            elif (f1_node == None):
+                f1_node = unrestricted_ready[0]
+            
+            # check we remove everything
+            if (f0_node in ready):
+                ready.remove(f0_node)
+            if (f0_node in unrestricted_ready):
+                unrestricted_ready.remove(f0_node)
+            if (f1_node in ready):
+                ready.remove(f1_node)
+            if (f1_node in unrestricted_ready):
+                unrestricted_ready.remove(f1_node)
+            # return
+            return [f0_node, f1_node]
+
+        if (len(unrestricted_ready) == 2):
+            # both open
+            if (f0_node == None and f1_node == None):
+                f0_node = unrestricted_ready[0]
+                f1_node = unrestricted_ready[1]
+            elif (f0_node == None):
+                # idx 0 is highest priority value
+                f0_node = unrestricted_ready[0]
+            elif (f1_node == None):
+                # idx 0 is highest priority value
+                f1_node = unrestricted_ready[0]
+            # check we remove everything
+            if (f0_node in ready):
+                ready.remove(f0_node)
+            if (f0_node in unrestricted_ready):
+                unrestricted_ready.remove(f0_node)
+            if (f1_node in ready):
+                ready.remove(f1_node)
+            if (f1_node in unrestricted_ready):
+                unrestricted_ready.remove(f1_node)
+            # return
+            return [f0_node, f1_node]
+                
+
+
+        # get highest priority node from unrestricted ready
+        if (len(unrestricted_ready) > 2):
+            highest_priority = []
+            first_node_prior = unrestricted_ready[0].priority    # bc sorted
+            # check if there are multiple of the same priority
+            for node in unrestricted_ready:
+                if (node[PRIORITY_NODE] == first_node_prior):
+                    highest_priority.append(node)
+            
+            if (self.DEBUG_FLAG == True):
+                print("HIGHEST PRIORITY:")
+                self.NEW_print_ready(highest_priority)
+                print("READY AFTER:")
+                self.NEW_print_ready(ready)
+
+
+            # Find operation for f0
+            if (f0_node == None):
+                for node in highest_priority:
+                    if (node[TYPE_NODE] != MULT_OP):
+                        f0_node = node
+                        break
+
+            # if we found an f0 node
+            if (f0_node != None):
+                # remove from list with highest priority nodes
+                if (f0_node in highest_priority):
+                    highest_priority.remove(f0_node)
+                # remove f0_node from ready
+                if (f0_node in ready):
+                    ready.remove(f0_node)
+                # remove from unrestricted
+                if (f0_node in unrestricted_ready):
+                    unrestricted_ready.remove(f0_node)
+
+                if (self.DEBUG_FLAG == True):
+                    print("HIGHEST PRIORITY AFTER F0NODE:")
+                    self.NEW_print_ready(highest_priority)
+                
+                # output can only have one per cycle
+                if f0_node[TYPE_NODE] == OUTPUT_OP:
+                    return [f0_node, NOP_OP]
+                
+
+                # if f0 took the only highest priority node, recompute highest priority nodes
+                if (len(highest_priority) == 0):
+                    
+                    if (self.DEBUG_FLAG == True):
+                        print("READY AFTER REMOVE F0NODE:")
+                        self.NEW_print_ready(ready)
+                    
+                    # if nothing left in ready, just return
+                    if (len(ready) == 0):
+                        return [f0_node, NOP_OP]
+                    else:
+                        first_node_prior = unrestricted_ready[0].priority    # bc sorted
+                        for node in unrestricted_ready:
+                            if (node[PRIORITY_NODE] == first_node_prior):
+                                highest_priority.append(node)
+            else:
+                # set to nop if we didn't find anything
+                f0_node = NOP_OP
+            
+            if (self.DEBUG_FLAG == True):
+                print("HIGHEST PRIORITY B4 f1:")
+                self.print_ready(highest_priority)
+                print("READY B4 f1:")
+                self.print_ready(ready)
+            
+
+            
+            # Find operation for f1
+            if (f1_node == None):
+                for node in highest_priority:
+                    if (node[TYPE_NODE] != LOAD_OP and node[TYPE_NODE] != STORE_OP):
+                        f1_node = node
+                        break
+            
+            # if we didnt find an f1 node
+            if (f1_node == None):
+                # set to nop if we didn't find anything
+                f1_node = NOP_OP
+            else:   # if we found an f1 node
+                if (f1_node in ready):
+                    ready.remove(f1_node)
+                if (f1_node in unrestricted_ready):
+                    unrestricted_ready.remove(f1_node)
+                if (f1_node in highest_priority):
+                    highest_priority.remove(f1_node)
+            
+        # double check that neither are None
+        if (f0_node == None):
+            f0_node = NOP_OP
+        if (f1_node == None):
+            f1_node = NOP_OP
+        ret = [f0_node, f1_node]
+        if (self.DEBUG_FLAG == True):
+            print("RETURN VALUE:")
+            print(ret)
+        
+        return ret
+    
+
+    def NEW_print_ready(self, ready):
+        ret = "["
+        for node in ready:
+            tmp = "<" + str(node[LINE_NUM_NODE]) + " " + str(opcodes_list[node[TYPE_NODE]]) + " , " + str(node[PRIORITY_NODE]) + ">, "
+            ret += tmp
+        ret += "]"
+        print(ret)
+
+    
+    def NEW_print_active(self, active):
+        ret = "["
+        for pair in active:
+            tmp = "<" + str(pair[0][LINE_NUM_NODE]) + " " + str(opcodes_list[pair[0][TYPE_NODE]]) + " , #" + str(pair[1]) + ">, "
+            ret += tmp
+        ret += "]"
+        print(ret)
+
+    
+    def NEW_print_schedule(self):
+        sched_len = len(self.schedule[F0])
+        print("F0:")
+        print(self.schedule[F0])
+
+        for node in self.schedule[F0]:
+            print(node)
+        print("F1:")
+        print(self.schedule[F1])
+
+        for node in self.schedule[F1]:
+            print(node)
+
+        print("SCHEDULE LEN: " + str(sched_len))
+        ret = ""
+        for i in range(1, sched_len + 1):
+            ret += "[ "
+            f0_value = self.schedule[F0][i]
+            f1_value = self.schedule[F1][i]
+            if f0_value == NOP_OP:
+                ret += opcodes_list[NOP_OP]
+            elif f0_value != None:
+                ret += f0_value[FULL_OP_NODE]
+            else:
+                ret += "None"
+            
+            ret += " ; "
+
+            if f1_value == NOP_OP:
+                ret += opcodes_list[NOP_OP]
+            elif f1_value != None:
+                ret += f1_value[FULL_OP_NODE]
+            else:
+                ret += "None"
+            ret += " ]\n"
+        print(ret)
+
+    def NEW_print_statuses(self):
+        for node in self.nodes_list:
+            print(node[FULL_OP_NODE] + " : " + str(node[STATUS_NODE]))
 
     # 🏳️‍🌈🏳️‍🌈🏳️‍🌈🏳️‍🌈🏳️‍🌈🏳️‍🌈🏳️‍🌈🏳️‍🌈🏳️‍🌈🏳️‍🌈🏳️‍🌈🏳️‍🌈🏳️‍🌈🏳️‍🌈🏳️‍🌈🏳️‍🌈🏳️‍🌈🏳️‍🌈🏳️‍🌈🏳️‍🌈🏳️‍🌈🏳️‍🌈🏳️‍🌈🏳️‍🌈🏳️‍🌈🏳️‍🌈🏳️‍🌈🏳️‍🌈🏳️‍🌈🏳️‍🌈🏳️‍🌈🏳️‍🌈🏳️‍🌈🏳️‍🌈🏳️‍🌈🏳️‍🌈🏳️‍🌈🏳️‍🌈🏳️‍🌈
 
@@ -1542,15 +1888,21 @@ def main():
 
         
         Lab_3 = Lab3(Lab_2.IR_LIST, DEBUG_FLAG, GRAPH_ONLY)
-        if (sys.argv[1] == '-n'):
-            GRAPH_ONLY = True
-            DEBUG_FLAG = True
-            Lab_3.build_new_graph()
-        else:
-            Lab_3.build_graph()
+        # if (sys.argv[1] == '-n'):
+        #     GRAPH_ONLY = True
+        #     DEBUG_FLAG = True
+        #     Lab_3.build_new_graph()
+        # else:
+        #     Lab_3.build_graph()
+
+        Lab_3.build_new_graph()
+
+        # Lab_3.build_graph()
+        
 
         if (GRAPH_ONLY == False):
-            Lab_3.main_schedule()
+            Lab_3.NEW_main_schedule()
+            # Lab_3.main_schedule()
     
     # pr.disable()
     # s = StringIO()
