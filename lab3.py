@@ -105,6 +105,7 @@ class Lab3:
         self.roots = []
         self.leaves = []
         self.node_edge_map = {}
+        
 
         # scheduling
         # initialize both unit dictionaries to have number of nodes issue slots
@@ -118,6 +119,8 @@ class Lab3:
         self.nodes_list = []
         # Edge format [IDX, kind, latency, VR, parent idx, out of line num (line num of parent node), child idx, into line num (line num of child node)]
         self.edges_list = []
+
+        self.load_list = []
         # child to parent list format: idx = child node index in nodes_list, element list of indices of parents
         # self.child_to_parents = []
         # parent to child list format: idx = parent node index in nodes_list, element list of indices of children
@@ -140,9 +143,9 @@ class Lab3:
         while (start != None):
             # creates node for o
             # if o defines vri, sets vr_to_node[vri] = node
-            tmp_node = self.add_node(start)  # always adds node
+            parent_node = self.add_node(start)  # always adds node
             # for each vrj used in o, add an edge from o to the node in M(vrj)
-            self.add_data_edge(tmp_node) # doesnt always add edge, conditions to add are in function
+            self.add_data_edge(parent_node) # doesnt always add edge, conditions to add are in function
 
             # if o is a load, store or output operation, add edges to ensure serialization of memory ops
             # variables to make sure we only add the most recent one
@@ -157,52 +160,96 @@ class Lab3:
             OUTPUT_RAW = False  # parent = output, child = store, conflict
 
             if (start.opcode == STORE_OP):
+                # store to store
+                if (recent_store_idx != None):
+                    # get recent store node
+                    recent_store_node = self.nodes_list[recent_store_idx]
+                    # check it is not itself
+                    if (recent_store_node != parent_node):
+                        # add serial edge
+                        self.add_serial_edge(parent_node, recent_store_node)
+                        STORE_WAW = True
+
+                # update store index
+                recent_store_idx = parent_node[IDX_NODE]
+
+                # output to store
+                if (recent_output_idx != None):
+                    # get recent output node
+                    recent_output_node = self.nodes_list[recent_output_idx]
+                    # add serial edge
+                    self.add_serial_edge(parent_node, recent_output_node)
+                
+                # load to store
+                for recent_load_node in self.load_list:
+                    # dont double add edges
+                    if (self.NEW_check_for_edge(parent_node, recent_load_node) == False):
+                        self.add_serial_edge(parent_node, recent_load_node)
 
 
-                recent_store_idx = tmp_node[IDX_NODE]
-
-            elif (start.opcode == LOAD_OP):
-
-
-
-                recent_load_idx = tmp_node[IDX_NODE]
+            elif (start.opcode == LOAD_OP): # second op
+                if (recent_store_idx != None):
+                    # get recent store node
+                    recent_store_node = self.nodes_list[recent_store_idx]
+                    # add conflict edge
+                    self.add_conflict_edge(parent_node, recent_store_node)
+                    LOAD_RAW = True
+                
+                # update
+                self.load_list.append(parent_node)
+                recent_load_idx = parent_node[IDX_NODE]
 
             elif (start.opcode == OUTPUT_OP):
+                # store to output
+                if (recent_store_idx != None):
+                    # get recent store node
+                    recent_store_node = self.nodes_list[recent_store_idx]
+                    # add conflict edge
+                    self.add_conflict_edge(parent_node, recent_store_node)
+                    OUTPUT_RAW = True
+                
+                # output to output
+                if (recent_output_idx != None):
+                    # get recent output node
+                    recent_output_node = self.nodes_list[recent_output_idx]
+                    # check not the same
+                    if (parent_node != recent_output_node):
+                        # add serial edge
+                        self.add_serial_edge(parent_node, recent_output_node)
+                        OUTPUT_OUTPUT = True
+                
+                # update
+                recent_output_idx = parent_node[IDX_NODE]
 
-
-
-
-                recent_output_idx = tmp_node[IDX_NODE]
-
-            tmp_node_list = list(self.nodes_list)
-            # reverse so it starts from most recent node to farthest away node
-            for other_node in reversed(tmp_node_list):
+            # tmp_node_list = self.nodes_list
+            # # reverse so it starts from most recent node to farthest away node
+            # for other_node in reversed(tmp_node_list):
                 
 
-                # serial and conflict edges
-                if (start.opcode == LOAD_OP or start.opcode == STORE_OP or start.opcode == OUTPUT_OP):
-                    # TODO: load to load, no edge needed
+            #     # serial and conflict edges
+            #     if (start.opcode == LOAD_OP or start.opcode == STORE_OP or start.opcode == OUTPUT_OP):
+            #         # TODO: load to load, no edge needed
 
-                    # either output to output (serial) or output to store (conflict)
-                    if (tmp_node[TYPE_NODE] == OUTPUT_OP):
-                        if (other_node[TYPE_NODE] == OUTPUT_OP and other_node != tmp_node and OUTPUT_OUTPUT == False):   # TODO: maybe OUTPUT_WAR variable so its the most recent output?
-                            self.add_serial_edge(tmp_node, other_node)
-                            OUTPUT_OUTPUT = True
-                        if (other_node[TYPE_NODE] == STORE_OP and OUTPUT_RAW == False):
-                            self.add_conflict_edge(tmp_node, other_node)
-                            OUTPUT_RAW = True   # only go to most recent store
-                    elif (tmp_node[TYPE_NODE] == STORE_OP):
-                        if (other_node[TYPE_NODE] == STORE_OP and other_node != tmp_node and STORE_WAW == False):
-                            self.add_serial_edge(tmp_node, other_node)
-                            STORE_WAW = True
-                        if (other_node[TYPE_NODE] == LOAD_OP and self.NEW_check_for_edge(tmp_node, other_node) == False):
-                            self.add_serial_edge(tmp_node, other_node)
-                        if (other_node[TYPE_NODE] == OUTPUT_OP):
-                            self.add_serial_edge(tmp_node, other_node)
-                    elif (tmp_node[TYPE_NODE] == LOAD_OP):
-                        if (other_node[TYPE_NODE] == STORE_OP and LOAD_RAW == False):
-                            self.add_conflict_edge(tmp_node, other_node)
-                            LOAD_RAW = True
+            #         # either output to output (serial) or output to store (conflict)
+            #         if (parent_node[TYPE_NODE] == OUTPUT_OP):
+            #             if (other_node[TYPE_NODE] == OUTPUT_OP and other_node != parent_node and OUTPUT_OUTPUT == False):   # TODO: maybe OUTPUT_WAR variable so its the most recent output?
+            #                 self.add_serial_edge(parent_node, other_node)
+            #                 OUTPUT_OUTPUT = True
+            #             if (other_node[TYPE_NODE] == STORE_OP and OUTPUT_RAW == False):
+            #                 self.add_conflict_edge(parent_node, other_node)
+            #                 OUTPUT_RAW = True   # only go to most recent store
+            #         elif (parent_node[TYPE_NODE] == STORE_OP):
+            #             if (other_node[TYPE_NODE] == STORE_OP and other_node != parent_node and STORE_WAW == False):
+            #                 self.add_serial_edge(parent_node, other_node)
+            #                 STORE_WAW = True
+            #             if (other_node[TYPE_NODE] == LOAD_OP and self.NEW_check_for_edge(parent_node, other_node) == False):
+            #                 self.add_serial_edge(parent_node, other_node)
+            #             if (other_node[TYPE_NODE] == OUTPUT_OP):
+            #                 self.add_serial_edge(parent_node, other_node)
+            #         elif (parent_node[TYPE_NODE] == LOAD_OP):
+            #             if (other_node[TYPE_NODE] == STORE_OP and LOAD_RAW == False):
+            #                 self.add_conflict_edge(parent_node, other_node)
+            #                 LOAD_RAW = True
 
             start = start.next
 
@@ -242,7 +289,7 @@ class Lab3:
         """
             New graph implementation
         """
-        if (self.DEBUG_FLAG == True): print("WASSUP BITCH")
+        if (self.DEBUG_FLAG == True): print("CUNT WASSUP BITCH")
         start = self.IR_LIST.head
 
 
@@ -265,7 +312,7 @@ class Lab3:
             LOAD_RAW = False    # parent = load, child = store, conflict
             OUTPUT_RAW = False  # parent = output, child = store, conflict
 
-            tmp_node_list = list(self.nodes_list)
+            tmp_node_list = self.nodes_list
             # reverse so it starts from most recent node to farthest away node
             for other_node in reversed(tmp_node_list):
                 
@@ -1268,8 +1315,8 @@ class Lab3:
 
 
 def main():
-    pr = cProfile.Profile()
-    pr.enable()
+    # pr = cProfile.Profile()
+    # pr.enable()
     # print("in lab3 main")
     # print(sys.argv)
     if (sys.argv[1] == '-h'):
@@ -1339,12 +1386,12 @@ def main():
             Lab_3.NEW_main_schedule()
             # Lab_3.main_schedule()
     
-    pr.disable()
-    s = StringIO()
-    sortby = 'cumulative'
-    ps = pstats.Stats(pr, stream=s).sort_stats(sortby)
-    ps.print_stats()
-    sys.stdout.write(s.getvalue())
+    # pr.disable()
+    # s = StringIO()
+    # sortby = 'cumulative'
+    # ps = pstats.Stats(pr, stream=s).sort_stats(sortby)
+    # ps.print_stats()
+    # sys.stdout.write(s.getvalue())
 
 
 
