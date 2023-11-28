@@ -127,9 +127,9 @@ class Lab3:
         # self.parent_to_children = []
 
     
-    def build_new_graph(self):
+    def build_graph(self):
         """
-            New graph implementation
+            build graph
         """
         if (self.DEBUG_FLAG == True): print("WASSUP BITCH")
 
@@ -183,7 +183,7 @@ class Lab3:
                 # load to store
                 for recent_load_node in self.load_list:
                     # dont double add edges
-                    if (self.NEW_check_for_edge(parent_node, recent_load_node) == False):
+                    if (self.check_for_edge(parent_node, recent_load_node) == False):
                         self.add_serial_edge(parent_node, recent_load_node)
 
 
@@ -221,49 +221,19 @@ class Lab3:
                 # update
                 recent_output_idx = parent_node[IDX_NODE]
 
-            # tmp_node_list = self.nodes_list
-            # # reverse so it starts from most recent node to farthest away node
-            # for other_node in reversed(tmp_node_list):
-                
-
-            #     # serial and conflict edges
-            #     if (start.opcode == LOAD_OP or start.opcode == STORE_OP or start.opcode == OUTPUT_OP):
-            #         # TODO: load to load, no edge needed
-
-            #         # either output to output (serial) or output to store (conflict)
-            #         if (parent_node[TYPE_NODE] == OUTPUT_OP):
-            #             if (other_node[TYPE_NODE] == OUTPUT_OP and other_node != parent_node and OUTPUT_OUTPUT == False):   # TODO: maybe OUTPUT_WAR variable so its the most recent output?
-            #                 self.add_serial_edge(parent_node, other_node)
-            #                 OUTPUT_OUTPUT = True
-            #             if (other_node[TYPE_NODE] == STORE_OP and OUTPUT_RAW == False):
-            #                 self.add_conflict_edge(parent_node, other_node)
-            #                 OUTPUT_RAW = True   # only go to most recent store
-            #         elif (parent_node[TYPE_NODE] == STORE_OP):
-            #             if (other_node[TYPE_NODE] == STORE_OP and other_node != parent_node and STORE_WAW == False):
-            #                 self.add_serial_edge(parent_node, other_node)
-            #                 STORE_WAW = True
-            #             if (other_node[TYPE_NODE] == LOAD_OP and self.NEW_check_for_edge(parent_node, other_node) == False):
-            #                 self.add_serial_edge(parent_node, other_node)
-            #             if (other_node[TYPE_NODE] == OUTPUT_OP):
-            #                 self.add_serial_edge(parent_node, other_node)
-            #         elif (parent_node[TYPE_NODE] == LOAD_OP):
-            #             if (other_node[TYPE_NODE] == STORE_OP and LOAD_RAW == False):
-            #                 self.add_conflict_edge(parent_node, other_node)
-            #                 LOAD_RAW = True
-
             start = start.next
 
         self.identify_roots_and_leaves()
         
-        self.NEW_convert_edge_map()
+        self.convert_edge_map()
         if (self.DEBUG_FLAG == True):
-            self.NEW_print_edge_map()
+            self.print_edge_map()
             print("roots:")
             print(self.roots)
             print("edges:")
             print(self.edges_list)
         for root in self.roots:
-            self.NEW_set_priorities(root)
+            self.set_priorities(root)
         
         if (self.DEBUG_FLAG == True or self.GRAPH_ONLY == True):
             self.print_dot()
@@ -285,95 +255,7 @@ class Lab3:
         if (self.DEBUG_FLAG == True): print("// num leaves: " + str(len(self.leaves)))
 
 
-    def SLOW_build_new_graph(self):
-        """
-            New graph implementation
-        """
-        if (self.DEBUG_FLAG == True): print("CUNT WASSUP BITCH")
-        start = self.IR_LIST.head
-
-
-        while (start != None):
-            # creates node for o
-            # if o defines vri, sets vr_to_node[vri] = node
-            tmp_node = self.add_node(start)  # always adds node
-            # for each vrj used in o, add an edge from o to the node in M(vrj)
-            self.add_data_edge(tmp_node) # doesnt always add edge, conditions to add are in function
-
-            # if o is a load, store or output operation, add edges to ensure serialization of memory ops
-            # variables to make sure we only add the most recent one
-            OUTPUT_OUTPUT = False   # parent = output, child = output, serial
-            STORE_WAW = False   # parent = store, child = store, serial
-            # WAR IS ALL READS SINCE LAST STORE, NOT JUST THE MOST RECENT READ
-            LAST_STORE = -1
-            # LOAD_WAR = False    # parent = store, child = load, serial
-            # OUTPUT_WAR = False  # parent = store, child = output, serial
-
-            LOAD_RAW = False    # parent = load, child = store, conflict
-            OUTPUT_RAW = False  # parent = output, child = store, conflict
-
-            tmp_node_list = self.nodes_list
-            # reverse so it starts from most recent node to farthest away node
-            for other_node in reversed(tmp_node_list):
-                
-
-                # serial and conflict edges
-                if (start.opcode == LOAD_OP or start.opcode == STORE_OP or start.opcode == OUTPUT_OP):
-                    # TODO: load to load, no edge needed
-
-                    # either output to output (serial) or output to store (conflict)
-                    if (tmp_node[TYPE_NODE] == OUTPUT_OP):
-                        if (other_node[TYPE_NODE] == OUTPUT_OP and other_node != tmp_node and OUTPUT_OUTPUT == False):   # TODO: maybe OUTPUT_WAR variable so its the most recent output?
-                            self.add_serial_edge(tmp_node, other_node)
-                            OUTPUT_OUTPUT = True
-                        if (other_node[TYPE_NODE] == STORE_OP and OUTPUT_RAW == False):
-                            self.add_conflict_edge(tmp_node, other_node)
-                            OUTPUT_RAW = True   # only go to most recent store
-                    elif (tmp_node[TYPE_NODE] == STORE_OP):
-                        if (other_node[TYPE_NODE] == STORE_OP and other_node != tmp_node and STORE_WAW == False):
-                            self.add_serial_edge(tmp_node, other_node)
-                            STORE_WAW = True
-                        if (other_node[TYPE_NODE] == LOAD_OP and self.NEW_check_for_edge(tmp_node, other_node) == False):
-                            self.add_serial_edge(tmp_node, other_node)
-                        if (other_node[TYPE_NODE] == OUTPUT_OP):
-                            self.add_serial_edge(tmp_node, other_node)
-                    elif (tmp_node[TYPE_NODE] == LOAD_OP):
-                        if (other_node[TYPE_NODE] == STORE_OP and LOAD_RAW == False):
-                            self.add_conflict_edge(tmp_node, other_node)
-                            LOAD_RAW = True
-
-            start = start.next
-
-        self.identify_roots_and_leaves()
-        
-        self.NEW_convert_edge_map()
-        if (self.DEBUG_FLAG == True):
-            self.NEW_print_edge_map()
-            print("roots:")
-            print(self.roots)
-            print("edges:")
-            print(self.edges_list)
-        for root in self.roots:
-            self.NEW_set_priorities(root)
-        
-        if (self.DEBUG_FLAG == True or self.GRAPH_ONLY == True):
-            self.print_dot()
-        
-        if (self.DEBUG_FLAG == True): 
-            print("DONE. NODES LIST:")
-            print(self.nodes_list)
-            print("DONE. EDGES LIST:")
-            print(self.edges_list)
-
-        
-        # print(self.DEBUG_FLAG)
-        # self.print_dot()
-
-        # if (self.DEBUG_FLAG == True):
-        #     self.DP_MAP.print_vrtonode()
-        # self.graph_consistency_checker()
-        if (self.DEBUG_FLAG == True): print("// num roots: " + str(len(self.roots)))
-        if (self.DEBUG_FLAG == True): print("// num leaves: " + str(len(self.leaves)))
+   
     
 
     # 🏳️‍🌈🏳️‍🌈🏳️‍🌈🏳️‍🌈🏳️‍🌈🏳️‍🌈🏳️‍🌈🏳️‍🌈🏳️‍🌈🏳️‍🌈🏳️‍🌈🏳️‍🌈🏳️‍🌈 NEW DEPENDENCE GRAPH 🏳️‍🌈🏳️‍🌈🏳️‍🌈🏳️‍🌈🏳️‍🌈🏳️‍🌈🏳️‍🌈🏳️‍🌈🏳️‍🌈🏳️‍🌈🏳️‍🌈🏳️‍🌈🏳️‍🌈
@@ -615,7 +497,7 @@ class Lab3:
         temp = opcode + lh + " " + rh
         return temp
 
-    def NEW_convert_edge_map(self):
+    def convert_edge_map(self):
         """
             different graph representation
             convert edge list to map
@@ -640,7 +522,7 @@ class Lab3:
         
 
 
-    def NEW_print_edge_map(self):
+    def print_edge_map(self):
         if (self.DEBUG_FLAG == True): print("NEW print CONVERT EDGE MAP")
 
         tmp = "{"
@@ -656,7 +538,7 @@ class Lab3:
         tmp += "}"
         print(tmp)
     
-    def NEW_set_priorities(self, start):
+    def set_priorities(self, start):
         """
             Start is a node in node format (list) from the roots
         """
@@ -788,7 +670,7 @@ class Lab3:
         if (self.DEBUG_FLAG == True): print("// " + str(success_count) + " / " + str(total_count) + " into/outof edges correct")
     
     
-    def NEW_check_for_edge(self, parent_node, child_node):
+    def check_for_edge(self, parent_node, child_node):
         """
             Check if a data edge already exists.
             True if data edge exists and we dont want to add new special edge type
@@ -812,7 +694,7 @@ class Lab3:
         return False
     
 
-    def NEW_main_schedule(self):
+    def main_schedule(self):
         if (self.DEBUG_FLAG == True): print("[MAIN SCHEDULE]")
         # set number of nodes
         self.num_nodes = len(self.nodes_list)
@@ -824,12 +706,12 @@ class Lab3:
         #     self.schedule[F0][i] = None
         #     self.schedule[F1][i] = None
 
-        self.NEW_schedule_algo()
-        self.NEW_print_schedule()
+        self.schedule_algo()
+        self.print_schedule()
         # print(self.DP_MAP.nodes_map[1])
         # print(self.DP_MAP.get_ir_node(self.DP_MAP.nodes_map[1].ir_list_node))
 
-    def NEW_schedule_algo(self):
+    def schedule_algo(self):
         if (self.DEBUG_FLAG == True): print("[SCHEDULE ALGO]")
 
         cycle = 1
@@ -846,13 +728,13 @@ class Lab3:
         if (self.DEBUG_FLAG == True): print(len(active))
         # Terminate when active and ready lists are empty
         while ((len(ready) == 0 and len(active) == 0) == False):
-            if (self.DEBUG_FLAG == True): self.NEW_print_statuses()
-            if (self.DEBUG_FLAG == True): self.NEW_print_schedule()
+            if (self.DEBUG_FLAG == True): self.print_statuses()
+            if (self.DEBUG_FLAG == True): self.print_schedule()
             sorted_objects = sorted(ready, key=lambda n: n[PRIORITY_NODE], reverse=True)
             ready = sorted_objects # array of nodes
             if (self.DEBUG_FLAG == True): print("CYCLE: " + str(cycle))
             # Pick an operation, o, for each functional unit
-            ops = self.NEW_get_operations_for_units(ready)
+            ops = self.get_operations_for_units(ready)
 
             early_release_ops = []
             
@@ -861,8 +743,8 @@ class Lab3:
                     print(len(ops))
                     print("OPS:")
                     print(ops)
-                    self.NEW_print_ready(ready)
-                    self.NEW_print_active(active)
+                    self.print_ready(ready)
+                    self.print_active(active)
             f0_op = ops[F0]
             f1_op = ops[F1]
             # Move o from Ready to Active
@@ -882,7 +764,7 @@ class Lab3:
 
             if (self.DEBUG_FLAG == True):
                 print("ACTIVE AFTER APPENDING")
-                self.NEW_print_active(active)
+                self.print_active(active)
 
             # Increment cycle
             cycle += 1
@@ -940,32 +822,40 @@ class Lab3:
             if (self.DEBUG_FLAG == True): 
                 print("len(multi_cycle_active) = " + str(len(multi_cycle_active)) + " vs. len(early_release_ops) = " + str(len(early_release_ops)))
             
-            # # Find each multi-cycle (load, store, mult) operation o in Active
-            # for pair in early_release_ops:
+            # # # Find each multi-cycle (load, store, mult) operation o in Active
+            # for pair in multi_cycle_active:
             #     # Check operations that depend on o for early releases (into, parent)
             #     #for each operation y that has a serial dependence back to op in active_set
-            #     for parent_linenum, edge in pair[0].into_edges.items():
-            #         satisfied = True
-            #         if (edge.kind == SERIAL):
-            #             y = edge.parent
+            #     for parent_idx, edge_idx in pair[0][INTO_EDGES_MAP_NODE].items():
+            #         # get edge
+            #         edge = self.edges_list[edge_idx]
+                    
+            #         if (edge[KIND_EDGE] == SERIAL):
+            #             satisfied = True
+            #             y = self.nodes_list[parent_idx]
             #             # check all dependences of edge.parent (y)
-            #             for pl, e in y.outof_edges.items():
-            #                 # check all non-serial dependences are finished 
-            #                 if (e.kind == SERIAL):
-            #                     if (e.child.status != ACTIVE):
+            #             for child_idx, out_edge_idx in y[OUTOF_EDGES_MAP_NODE].items():
+            #                 # get edge
+            #                 e = self.edges_list[out_edge_idx]
+            #                 # get child
+            #                 c = self.nodes_list[child_idx]
+            #                 # check serial dependencies
+            #                 if (e[KIND_EDGE] == SERIAL):
+            #                     if (c[STATUS_NODE] != ACTIVE and c[STATUS_NODE] != RETIRED):
             #                         satisfied = False
+            #                 # check all non-serial dependences are finished 
             #                 else:
-            #                     if (e.child.status != RETIRED):
+            #                     if (c[STATUS_NODE] != RETIRED):
             #                         satisfied = False
             #             if (satisfied): # Add y to the Ready set
             #                 if (self.DEBUG_FLAG == True): print("early release- Adding " + str(d.line_num) + " to the ready set!")
-            #                 y.status = READY
+            #                 y[STATUS_NODE] = READY
             #                 ready.append(y)
             #             else:
             #                 if (self.DEBUG_FLAG == True): print("early release- Depending ops of " + str(d.line_num) + " are not ready")
 
         
-    def NEW_get_operations_for_units(self, ready):
+    def get_operations_for_units(self, ready):
         """
             Get an operation for each functional unit based on the highest priority and remove those from ready
                 and these constraints:
@@ -983,7 +873,7 @@ class Lab3:
         if (self.DEBUG_FLAG == True):
             print("[get_operations_for_units]")
             print("READY BEFORE")
-            self.NEW_print_ready(ready)
+            self.print_ready(ready)
 
 
         if (len(ready) == 0):
@@ -1004,9 +894,9 @@ class Lab3:
       
         if (self.DEBUG_FLAG == True):
             print("RESTRICTED READY:")
-            self.NEW_print_ready(restricted_ready)
+            self.print_ready(restricted_ready)
             print("UNRESTRICTED READY:")
-            self.NEW_print_ready(unrestricted_ready)
+            self.print_ready(unrestricted_ready)
 
         # 🔒🔒🔒🔒🔒🔒🔒 First, restricted nodes 🔒🔒🔒🔒🔒🔒🔒🔒
         # f0
@@ -1150,9 +1040,9 @@ class Lab3:
             
             if (self.DEBUG_FLAG == True):
                 print("HIGHEST PRIORITY:")
-                self.NEW_print_ready(highest_priority)
+                self.print_ready(highest_priority)
                 print("READY AFTER:")
-                self.NEW_print_ready(ready)
+                self.print_ready(ready)
 
 
             # Find operation for f0
@@ -1176,7 +1066,7 @@ class Lab3:
 
                 if (self.DEBUG_FLAG == True):
                     print("HIGHEST PRIORITY AFTER F0NODE:")
-                    self.NEW_print_ready(highest_priority)
+                    self.print_ready(highest_priority)
                 
                 # output can only have one per cycle
                 if f0_node[TYPE_NODE] == OUTPUT_OP:
@@ -1188,7 +1078,7 @@ class Lab3:
                     
                     if (self.DEBUG_FLAG == True):
                         print("READY AFTER REMOVE F0NODE:")
-                        self.NEW_print_ready(ready)
+                        self.print_ready(ready)
                     
                     # if nothing left in ready, just return
                     if (len(ready) == 0):
@@ -1242,7 +1132,7 @@ class Lab3:
         return ret
     
 
-    def NEW_print_ready(self, ready):
+    def print_ready(self, ready):
         ret = "["
         for node in ready:
             tmp = "<" + str(node[LINE_NUM_NODE]) + " " + str(opcodes_list[node[TYPE_NODE]]) + " , " + str(node[PRIORITY_NODE]) + ">, "
@@ -1251,7 +1141,7 @@ class Lab3:
         print(ret)
 
     
-    def NEW_print_active(self, active):
+    def print_active(self, active):
         ret = "["
         for pair in active:
             tmp = "<" + str(pair[0][LINE_NUM_NODE]) + " " + str(opcodes_list[pair[0][TYPE_NODE]]) + " , #" + str(pair[1]) + ">, "
@@ -1260,7 +1150,7 @@ class Lab3:
         print(ret)
 
     
-    def NEW_print_schedule(self):
+    def print_schedule(self):
         sched_len = len(self.schedule[F0])
         if (self.DEBUG_FLAG == True):
             print("F0:")
@@ -1299,7 +1189,7 @@ class Lab3:
             ret += " ]\n"
         print(ret)
 
-    def NEW_print_statuses(self):
+    def print_statuses(self):
         for node in self.nodes_list:
             print(node[FULL_OP_NODE] + " : " + str(node[STATUS_NODE]))
 
@@ -1377,13 +1267,13 @@ def main():
         # else:
         #     Lab_3.build_graph()
 
-        Lab_3.build_new_graph()
+        Lab_3.build_graph()
 
         # Lab_3.build_graph()
         
 
         if (GRAPH_ONLY == False):
-            Lab_3.NEW_main_schedule()
+            Lab_3.main_schedule()
             # Lab_3.main_schedule()
     
     # pr.disable()

@@ -1,2 +1,2 @@
 NetId	Name	T1k	T2k	T4k	T8k	T16k	T32k	T64k	T128k	Lang.	Scaling Pts	Eff Pts %
-rew9	Rose Whitt	0.0863	0.1248	0.2086	0.3929	0.7443	1.4865	3.0953	6.2606	python 	 linear	100	100
+rew9	Rose Whitt	0.0848	0.1258	0.2089	0.3924	0.7238	1.4872	3.0243	6.0734	python 	 linear	100	100

@@ -1,0 +1,25 @@
+Autotimer: using Scalability SLOCs blocks
+5 trials at each block size
+=======================================================================
+Testing submission: rew9.tar
+NetId: rew9	Name: Rose Whitt
+=== built executable; should be ready to run ===
+
+Testing Scalability:
+
+	T001k.i:  	0.0848 seconds
+	T002k.i:  	0.1258 seconds
+	T004k.i:  	0.2089 seconds
+	T008k.i:  	0.3924 seconds
+	T016k.i:  	0.7238 seconds
+	T032k.i:  	1.4872 seconds
+	T064k.i:  	3.0243 seconds
+	T128k.i:  	6.0734 seconds
+
+Scaling score is 100
+Efficiency score is 100	(python , 6.073486)
+
+finished timing run on submission rew9.tar
+=======================================================================
+
+Timing run complete.
