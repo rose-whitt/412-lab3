@@ -130,10 +130,10 @@ class Lab3:
         """
             New graph implementation
         """
-        print("WASSUP BITCH")
+        if (self.DEBUG_FLAG == True): print("WASSUP BITCH")
         start = self.IR_LIST.head
         while (start != None):
-            print("CUNT")
+            if (self.DEBUG_FLAG == True): print("CUNT")
             # creates node for o
             # if o defines vri, sets vr_to_node[vri] = node
             tmp_node = self.add_node(start)  # always adds node
@@ -187,25 +187,27 @@ class Lab3:
         self.identify_roots_and_leaves()
         
         self.NEW_convert_edge_map()
-        if (self.DEBUG_FLAG == True): self.NEW_print_edge_map()
-        print("roots:")
-        print(self.roots)
-        print("edges:")
-        print(self.edges_list)
+        if (self.DEBUG_FLAG == True):
+            self.NEW_print_edge_map()
+            print("roots:")
+            print(self.roots)
+            print("edges:")
+            print(self.edges_list)
         for root in self.roots:
             self.NEW_set_priorities(root)
         
         if (self.DEBUG_FLAG == True or self.GRAPH_ONLY == True):
             self.print_dot()
         
-        print("DONE. NODES LIST:")
-        print(self.nodes_list)
-        print("DONE. EDGES LIST:")
-        print(self.edges_list)
+        if (self.DEBUG_FLAG == True): 
+            print("DONE. NODES LIST:")
+            print(self.nodes_list)
+            print("DONE. EDGES LIST:")
+            print(self.edges_list)
 
         
-        print(self.DEBUG_FLAG)
-        self.print_dot()
+        # print(self.DEBUG_FLAG)
+        # self.print_dot()
 
         # if (self.DEBUG_FLAG == True):
         #     self.DP_MAP.print_vrtonode()
@@ -752,9 +754,9 @@ class Lab3:
                 active.remove(pair)
                 # For each op, d, that depends on o (into, d = parent)
                 for parent_linenum, edge in pair[0].into_edges.items():
-                    print("d:")
+                    if (self.DEBUG_FLAG == True): print("d:")
                     d = edge.parent
-                    print(d)
+                    if (self.DEBUG_FLAG == True): print(d)
                     
                     all_ready = True
                     # check outof nodes of d
@@ -1100,9 +1102,10 @@ class Lab3:
         if (self.DEBUG_FLAG == True): print("[identify_roots_and_leaves]")
         tmp_roots = []
         tmp_leaves = []
-        print("[identify_roots_and_leaves]")
-        print(self.nodes_list)
-        print("num nodes: " + str(len(self.nodes_list)))
+        if (self.DEBUG_FLAG == True):
+            print("[identify_roots_and_leaves]")
+            print(self.nodes_list)
+            print("num nodes: " + str(len(self.nodes_list)))
         for node in self.nodes_list:
             if (len(node[INTO_EDGES_MAP_NODE]) == 0):
                 node[ROOT_BOOL_NODE] = True
@@ -1145,29 +1148,30 @@ class Lab3:
             {parent idx : [(child idx, edge_latency), ...]}
 
         """
-        print("NEW CONVERT EDGE MAP")
-        print(self.edges_list)
+        if (self.DEBUG_FLAG == True): 
+            print("NEW CONVERT EDGE MAP")
+            print(self.edges_list)
         # self.node_edge_map = {node: [] for node in self.nodes_list}
         for node in self.nodes_list:
             self.node_edge_map[node[IDX_NODE]] = []
         for edge in self.edges_list:
-            print(edge)
+            if (self.DEBUG_FLAG == True): print(edge)
             parent_idx = edge[PARENT_IDX_EDGE]
-            print(parent_idx)
+            if (self.DEBUG_FLAG == True): print(parent_idx)
             child_idx = edge[CHILD_IDX_EDGE]
             edge_latency = edge[LATENCY_EDGE]
             tuple = (child_idx, edge_latency)
-            print(self.node_edge_map[parent_idx])
+            if (self.DEBUG_FLAG == True): print(self.node_edge_map[parent_idx])
             self.node_edge_map[parent_idx].append(tuple)
         
 
 
     def NEW_print_edge_map(self):
-        print("NEW print CONVERT EDGE MAP")
+        if (self.DEBUG_FLAG == True): print("NEW print CONVERT EDGE MAP")
 
         tmp = "{"
         for parent_idx, edges in self.node_edge_map.items():
-            print(parent_idx)
+            if (self.DEBUG_FLAG == True): print(parent_idx)
             tmp += str(self.nodes_list[parent_idx][LINE_NUM_NODE])
             tmp += ": ["
             for tuple in edges:
@@ -1184,7 +1188,7 @@ class Lab3:
         """
         # initialized stack with the start node and its priority
         stack = [(start[IDX_NODE], 0)]
-        print("NEW set priorities")
+        if (self.DEBUG_FLAG == True): print("NEW set priorities")
 
         while stack:
             # print("pussy- stack:")
@@ -1202,7 +1206,7 @@ class Lab3:
 
             # push neighbors onto stack in reverse order to match th eorder of recursive function
             for neighbor_idx, edge_latency in reversed(self.node_edge_map.get(current_node_idx, [])):
-                print("Cunt")
+                if (self.DEBUG_FLAG == True): print("Cunt")
                 stack.append((neighbor_idx, current_priority + edge_latency))
 
     def print_dot(self):
@@ -1367,7 +1371,7 @@ class Lab3:
         if (self.DEBUG_FLAG == True): print(len(active))
         # Terminate when active and ready lists are empty
         while ((len(ready) == 0 and len(active) == 0) == False):
-            self.NEW_print_statuses()
+            if (self.DEBUG_FLAG == True): self.NEW_print_statuses()
             if (self.DEBUG_FLAG == True): self.NEW_print_schedule()
             sorted_objects = sorted(ready, key=lambda n: n[PRIORITY_NODE], reverse=True)
             ready = sorted_objects # array of nodes
@@ -1378,12 +1382,12 @@ class Lab3:
             early_release_ops = []
             
             if (self.DEBUG_FLAG == True):
-                print(len(ops))
-                print("OPS:")
-                print(ops)
-
-                self.NEW_print_ready(ready)
-                self.NEW_print_active(active)
+                if (self.DEBUG_FLAG == True):
+                    print(len(ops))
+                    print("OPS:")
+                    print(ops)
+                    self.NEW_print_ready(ready)
+                    self.NEW_print_active(active)
             f0_op = ops[F0]
             f1_op = ops[F1]
             # Move o from Ready to Active
@@ -1424,8 +1428,9 @@ class Lab3:
                 for parent_idx, edge_idx in pair[0][INTO_EDGES_MAP_NODE].items():
                     edge = self.edges_list[edge_idx]
                     d = self.nodes_list[edge[PARENT_IDX_EDGE]]
-                    print("d:")
-                    print(d[FULL_OP_NODE])
+                    if (self.DEBUG_FLAG == True): 
+                        print("d:")
+                        print(d[FULL_OP_NODE])
                     
                     all_ready = True
                     # check outof nodes of d
@@ -1434,7 +1439,7 @@ class Lab3:
                         child = self.nodes_list[child_idx]
                         # If d is now "ready" (operation that defined that operand is completed/retired- "If a node represents a use of a value, it has an edge to the node that defines that value")
                         if (child[STATUS_NODE] != RETIRED):
-                            print("child retired")
+                            if (self.DEBUG_FLAG == True): print("child retired")
                             all_ready = False
                     if (all_ready): # Add d to the Ready set
                         if (self.DEBUG_FLAG == True): print("Defining ops ready! Adding " + str(d[LINE_NUM_NODE]) + " to the ready set!")
@@ -1662,7 +1667,7 @@ class Lab3:
         # get highest priority node from unrestricted ready
         if (len(unrestricted_ready) > 2):
             highest_priority = []
-            first_node_prior = unrestricted_ready[0].priority    # bc sorted
+            first_node_prior = unrestricted_ready[0][PRIORITY_NODE]   # bc sorted
             # check if there are multiple of the same priority
             for node in unrestricted_ready:
                 if (node[PRIORITY_NODE] == first_node_prior):
@@ -1714,7 +1719,7 @@ class Lab3:
                     if (len(ready) == 0):
                         return [f0_node, NOP_OP]
                     else:
-                        first_node_prior = unrestricted_ready[0].priority    # bc sorted
+                        first_node_prior = unrestricted_ready[0][PRIORITY_NODE]    # bc sorted
                         for node in unrestricted_ready:
                             if (node[PRIORITY_NODE] == first_node_prior):
                                 highest_priority.append(node)
@@ -1782,18 +1787,20 @@ class Lab3:
     
     def NEW_print_schedule(self):
         sched_len = len(self.schedule[F0])
-        print("F0:")
-        print(self.schedule[F0])
+        if (self.DEBUG_FLAG == True):
+            print("F0:")
+            print(self.schedule[F0])
 
-        for node in self.schedule[F0]:
-            print(node)
-        print("F1:")
-        print(self.schedule[F1])
+            for node in self.schedule[F0]:
+                print(node)
+            print("F1:")
+            
+            print(self.schedule[F1])
 
-        for node in self.schedule[F1]:
-            print(node)
+            for node in self.schedule[F1]:
+                print(node)
 
-        print("SCHEDULE LEN: " + str(sched_len))
+        if (self.DEBUG_FLAG == True): print("SCHEDULE LEN: " + str(sched_len))
         ret = ""
         for i in range(1, sched_len + 1):
             ret += "[ "
