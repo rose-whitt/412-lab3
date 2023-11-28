@@ -5,6 +5,65 @@
 ./lab3/scripts/test ./schedule ./lab3/report
 
 
+T012k.i before any attempts at optimization:
+1469321 function calls in 11.864 seconds
+
+   Ordered by: cumulative time
+
+   ncalls  tottime  percall  cumtime  percall filename:lineno(function)
+        1   10.803   10.803   10.973   10.973 lab3.py:127(build_new_graph)
+        1    0.000    0.000    0.547    0.547 lab3.py:655(NEW_main_schedule)
+        1    0.005    0.005    0.352    0.352 lab3.py:1102(NEW_print_schedule)
+        1    0.346    0.346    0.346    0.346 {built-in method builtins.print}
+        1    0.000    0.000    0.307    0.307 /storage-home/r/rew9/comp412/412-lab3/lab2.py:54(__init__)
+        1    0.000    0.000    0.307    0.307 /storage-home/r/rew9/comp412/412-lab3/lab1.py:384(main)
+        1    0.078    0.078    0.307    0.307 /storage-home/r/rew9/comp412/412-lab3/lab1.py:24(run)
+        1    0.054    0.054    0.196    0.196 lab3.py:672(NEW_schedule_algo)
+   162292    0.113    0.000    0.115    0.000 /storage-home/r/rew9/comp412/412-lab3/scanner.py:127(get_token)
+     6006    0.093    0.000    0.107    0.000 lab3.py:807(NEW_get_operations_for_units)
+    12001    0.071    0.000    0.097    0.000 /storage-home/r/rew9/comp412/412-lab3/scanner.py:89(convert_line_to_ascii_list)
+    12000    0.043    0.000    0.076    0.000 lab3.py:221(add_node)
+    12000    0.041    0.000    0.045    0.000 lab3.py:277(add_data_edge)
+        1    0.018    0.018    0.036    0.036 /storage-home/r/rew9/comp412/412-lab3/lab2.py:504(rename)
+   556826    0.032    0.000    0.032    0.000 {method 'append' of 'list' objects}
+        1    0.023    0.023    0.031    0.031 lab3.py:499(NEW_set_priorities)
+    12000    0.029    0.000    0.029    0.000 lab3.py:434(get_full_op)
+     6007    0.019    0.000    0.028    0.000 {built-in method builtins.sorted}
+        1    0.013    0.013    0.015    0.015 lab3.py:458(NEW_convert_edge_map)
+    23992    0.012    0.000    0.012    0.000 /storage-home/r/rew9/comp412/412-lab3/lab2.py:382(op_uses)
+   234388    0.011    0.000    0.011    0.000 {built-in method builtins.ord}
+   113394    0.009    0.000    0.009    0.000 lab3.py:690(<lambda>)
+    12000    0.009    0.000    0.009    0.000 /storage-home/r/rew9/comp412/412-lab3/IR_List.py:39(__init__)
+   102326    0.008    0.000    0.008    0.000 {built-in method builtins.len}
+    11998    0.007    0.000    0.007    0.000 /storage-home/r/rew9/comp412/412-lab3/lab2.py:364(op_defines)
+    12000    0.005    0.000    0.005    0.000 /storage-home/r/rew9/comp412/412-lab3/IR_List.py:113(append)
+        1    0.003    0.003    0.004    0.004 lab3.py:406(identify_roots_and_leaves)
+    47990    0.004    0.000    0.004    0.000 {method 'remove' of 'list' objects}
+    23994    0.003    0.000    0.003    0.000 {built-in method builtins.max}
+    12001    0.003    0.000    0.003    0.000 {method 'readline' of '_io.TextIOWrapper' objects}
+    35993    0.003    0.000    0.003    0.000 {method 'items' of 'dict' objects}
+    23994    0.002    0.000    0.002    0.000 {method 'get' of 'dict' objects}
+    12000    0.002    0.000    0.002    0.000 {method 'index' of 'list' objects}
+    23994    0.002    0.000    0.002    0.000 {method 'pop' of 'list' objects}
+        1    0.000    0.000    0.000    0.000 {built-in method io.open}
+       32    0.000    0.000    0.000    0.000 /usr/lib64/python3.6/codecs.py:318(decode)
+       32    0.000    0.000    0.000    0.000 {built-in method _codecs.utf_8_decode}
+        1    0.000    0.000    0.000    0.000 {method 'close' of '_io.TextIOWrapper' objects}
+        1    0.000    0.000    0.000    0.000 lab3.py:381(add_conflict_edge)
+       32    0.000    0.000    0.000    0.000 /usr/lib64/python3.6/codecs.py:330(getstate)
+        1    0.000    0.000    0.000    0.000 /storage-home/r/rew9/comp412/412-lab3/scanner.py:53(__init__)
+        1    0.000    0.000    0.000    0.000 lab3.py:100(__init__)
+        1    0.000    0.000    0.000    0.000 /usr/lib64/python3.6/_bootlocale.py:23(getpreferredencoding)
+        1    0.000    0.000    0.000    0.000 /storage-home/r/rew9/comp412/412-lab3/lab1.py:15(__init__)
+        1    0.000    0.000    0.000    0.000 /storage-home/r/rew9/comp412/412-lab3/lab2.py:506(<listcomp>)
+        1    0.000    0.000    0.000    0.000 /usr/lib64/python3.6/codecs.py:308(__init__)
+        1    0.000    0.000    0.000    0.000 {method 'disable' of '_lsprof.Profiler' objects}
+        3    0.000    0.000    0.000    0.000 lab3.py:677(<lambda>)
+        1    0.000    0.000    0.000    0.000 /storage-home/r/rew9/comp412/412-lab3/IR_List.py:106(__init__)
+        1    0.000    0.000    0.000    0.000 /storage-home/r/rew9/comp412/412-lab3/lab2.py:507(<listcomp>)
+        1    0.000    0.000    0.000    0.000 {built-in method _locale.nl_langinfo}
+        1    0.000    0.000    0.000    0.000 /usr/lib64/python3.6/codecs.py:259(__init__)
+
 run reference to get scheduled code: ~comp412/students/lab3/lab3_ref -s -g ./dgslide4.i >> scheduled_dgslide4_ref.i
 run the scheduled code against simulator: ./lab3/sim -t -s 1 ./scheduled_dgslide4_ref.i >> sim_scheduled_dgslide4.i
 run the original (not scheduled) code against simulator: ./lab3/sim -t -s 3 ./dgslide4.i >> sim_notscheduled_dgslide.i

@@ -1,0 +1,30 @@
+Autotimer: using Scalability SLOCs blocks
+5 trials at each block size
+=======================================================================
+Testing submission: rew9.tar
+NetId: rew9	Name: Rose Whitt
+=== built executable; should be ready to run ===
+
+Testing Scalability:
+
+
+--> Scheduler exceeded timeout value
+
+	T001k.i:  	0.1597 seconds
+	T002k.i:  	0.4251 seconds
+	T004k.i:  	1.5412 seconds
+	T008k.i:  	5.3045 seconds
+	T016k.i:  	21.092 seconds
+	T032k.i:  	60.004 seconds
+	T064k.i:  	60.004 seconds
+	T128k.i:  	60.003 seconds
+
+Scaling score is 0
+Efficiency score is 0	(python , 60.003065)
+
+	Anomalous behavior: 4 inputs showed no growth
+
+finished timing run on submission rew9.tar
+=======================================================================
+
+Timing run complete.
