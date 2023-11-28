@@ -7,22 +7,17 @@ NetId: rew9	Name: Rose Whitt
 
 Testing Scalability:
 
+	T001k.i:  	0.0863 seconds
+	T002k.i:  	0.1248 seconds
+	T004k.i:  	0.2086 seconds
+	T008k.i:  	0.3929 seconds
+	T016k.i:  	0.7443 seconds
+	T032k.i:  	1.4865 seconds
+	T064k.i:  	3.0953 seconds
+	T128k.i:  	6.2606 seconds
 
---> Scheduler exceeded timeout value
-
-	T001k.i:  	0.1576 seconds
-	T002k.i:  	0.3928 seconds
-	T004k.i:  	1.3440 seconds
-	T008k.i:  	4.9294 seconds
-	T016k.i:  	19.858 seconds
-	T032k.i:  	60.007 seconds
-	T064k.i:  	60.004 seconds
-	T128k.i:  	60.008 seconds
-
-Scaling score is 0
-Efficiency score is 0	(python , 60.008970999999995)
-
-	Anomalous behavior: 4 inputs showed no growth
+Scaling score is 100
+Efficiency score is 100	(python , 6.260669)
 
 finished timing run on submission rew9.tar
 =======================================================================
